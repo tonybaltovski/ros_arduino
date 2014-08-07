@@ -7,7 +7,7 @@ find_package(Boost REQUIRED COMPONENTS system thread signals)
 
 catkin_package(
 	 DEPENDS
-	 CATKIN_DEPENDS roscpp geometry_msgs tf ros_arduino_msgs
+	 CATKIN_DEPENDS roscpp geometry_msgs ros_arduino_msgs tf
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
 )

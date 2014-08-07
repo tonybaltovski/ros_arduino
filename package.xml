@@ -11,8 +11,8 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>geometry_msgs</build_depend>
-  <build_depend>tf</build_depend>
   <build_depend>ros_arduino_msgs</build_depend>
+  <build_depend>tf</build_depend>
   <build_depend>roslaunch</build_depend>
   <build_depend>roslint</build_depend>
 
