@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ros_arduino_base)
 
-find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs tf roslaunch roslint)
+find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs ros_arduino_msgs tf roslaunch roslint)
 find_package(Boost REQUIRED COMPONENTS system thread signals)
 
 
 catkin_package(
 	 DEPENDS
-	 CATKIN_DEPENDS roscpp geometry_msgs tf
+	 CATKIN_DEPENDS roscpp geometry_msgs tf ros_arduino_msgs
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
 )
