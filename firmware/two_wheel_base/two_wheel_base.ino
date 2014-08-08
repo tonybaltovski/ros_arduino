@@ -35,16 +35,9 @@
 #include <Encoder.h>
 #include <PololuMC33926.h>
 
-// Left and Right motor driver objects
-MC33926 left_motor(2,3,4,5);
-MC33926 right_motor(12,11,10,9);
+#include "user_config.h"
+#include "motor_driver_config.h"
 
-// Left side encoders pins
-#define LEFT_ENCODER_A 14  // Interrupt on Teensy 3.0
-#define LEFT_ENCODER_B 15  // Interrupt on Teensy 3.0
-// Right side encoders pins
-#define RIGHT_ENCODER_A 6  // Interrupt on Teensy 3.0
-#define RIGHT_ENCODER_B 7  // Interrupt on Teensy 3.0
 
 // Encoder objects from PJRC encoder library.
 Encoder left_encoder(LEFT_ENCODER_A,LEFT_ENCODER_B);
@@ -106,10 +99,6 @@ ros::Publisher pub_encoders("encoders", &encoders_msg);
 
 void setup() 
 { 
-  // Initalize Motors
-  left_motor.init();
-  right_motor.init();
-
   // Set the node handle
   nh.getHardware()->setBaud(115200);
   nh.initNode();
@@ -250,23 +239,23 @@ void Control()
   
   doControl(&left_motor_controller);
   doControl(&right_motor_controller);
-  
+
   if(left_motor_controller.desired_velocity > 0 || left_motor_controller.desired_velocity < 0)
   {
-      left_motor.set_pwm(left_motor_controller.command);
+      commandLeftMotor(left_motor_controller.command);
   }
   else
   {
-      left_motor.set_pwm(0);
+      commandLeftMotor(0);
   }
     
   if(right_motor_controller.desired_velocity > 0 || right_motor_controller.desired_velocity < 0)
   {
-      right_motor.set_pwm(right_motor_controller.command);
+      commandLeftMotor(right_motor_controller.command);
   }
   else
   {
-      right_motor.set_pwm(0);
+      commandLeftMotor(0);
   }
 }
 
