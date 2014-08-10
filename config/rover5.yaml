@@ -4,6 +4,6 @@ counts_per_rev: 333.333
 gear_ratio: 86.8
 encoder_on_motor_shaft: 0 # 0 is false and 1 is true
 
-pid_gains: [20,0,15]
-control_rate: [100]
-encoder_rate: [100]
+pid_gains: [20,0,750]
+control_rate: [50]
+encoder_rate: [50]

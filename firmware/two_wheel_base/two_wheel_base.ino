@@ -132,7 +132,8 @@ void setup()
     pid_gains[0] = 20;  // Kp
     pid_gains[1] =  0;  // Ki
     pid_gains[2] = 15;  // Kd
-  } 
+  }
+
   if (!nh.getParam("counts_per_rev", counts_per_rev,1))
   {
     counts_per_rev[0] = 48.0;
@@ -165,8 +166,8 @@ void setup()
   }
   // Create PID gains for this specific control rate
   Kp = pid_gains[0];
-  Ki = pid_gains[1] * control_rate[0];
-  Kd = pid_gains[2] / control_rate[0];
+  Ki = pid_gains[1] / control_rate[0];
+  Kd = pid_gains[2] * control_rate[0];
 } 
 
 
