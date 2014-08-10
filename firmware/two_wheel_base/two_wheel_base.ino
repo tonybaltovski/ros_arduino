@@ -65,6 +65,7 @@ ControlData;
 
 // Gains;
 int pid_gains[3];
+double Kp, Ki, Kd;
 // Structures containing PID data
 ControlData left_motor_controller;
 ControlData right_motor_controller;
@@ -162,7 +163,10 @@ void setup()
   {
     meters_per_counts = ((PI * 2 * wheel_radius[0]) / counts_per_rev[0]);
   }
-
+  // Create PID gains for this specific control rate
+  Kp = pid_gains[0];
+  Ki = pid_gains[1] * control_rate[0];
+  Kd = pid_gains[2] / control_rate[0];
 } 
 
 
