@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package>
+  <name>ros_arduino</name>
+  <version>0.0.0</version>
+  <description>The ros_arduino metapackage</description>
+  <maintainer email="tony.baltovski@gmail.com">Tony Baltovski</maintainer>
+  <license>BSD</license>
+  <author email="tony.baltovski@gmail.com">Tony Baltovski</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+		<metapackage/>
+  </export>
+</package>
