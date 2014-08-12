@@ -51,9 +51,9 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
                                     ros::TransportHints().unreliable().reliable().tcpNoDelay());
   cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, &ROSArduinoBase::cmdVelCallback, this);
   update_gains_client_ = nh.serviceClient<ros_arduino_base::UpdateGains>("update_gains");
-	dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType f = 
+  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType f = 
 	                                  boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
-	gain_server_.setCallback(f);
+  gain_server_.setCallback(f);
 		
   // ROS driver params
   nh_private.param<double>("counts_per_rev", counts_per_rev_, 48.0);
@@ -89,16 +89,16 @@ void ROSArduinoBase::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_ms
 
 void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level) 
 {
-	gains_[0] = config.K_P;
+  gains_[0] = config.K_P;
   gains_[1] = config.K_I;
-	gains_[2] = config.K_D;
-	ros_arduino_base::UpdateGains srv;
-	srv.request.p = gains_[0];
+  gains_[2] = config.K_D;
+  ros_arduino_base::UpdateGains srv;
+  srv.request.p = gains_[0];
   srv.request.i = gains_[1];
   srv.request.d = gains_[2];
   if (update_gains_client_.call(srv))
   {
-	  ROS_INFO("Motor Gains changed to P:%f I:%f D: %f",gains_[0],gains_[1],gains_[2]);
+    ROS_INFO("Motor Gains changed to P:%f I:%f D: %f",gains_[0],gains_[1],gains_[2]);
   }
   else
   {

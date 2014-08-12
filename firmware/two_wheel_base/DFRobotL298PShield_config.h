@@ -8,7 +8,7 @@
 #define left_motor_pwm 7
 #define left_motor_enable 6
 //Right Motor
-#define right_motor_enable 5                      
+#define right_motor_enable 5
 #define right_motor_pwm 4
 // Left and Right motor driver objects
 
@@ -18,27 +18,27 @@ void setupMotors()
 }
 void commandLeftMotor(int cmd)
 {
-  if(cmd >= 0)
+  if (cmd >= 0)
   {
     digitalWrite(left_motor_pwm, 1);
-  } 
+  }
   else
   {
     digitalWrite(left_motor_pwm, 0);
   }
-  analogWrite(left_motor_enable,abs(cmd));
+  analogWrite(left_motor_enable, abs(cmd));
 }
 void commandRightMotor(int cmd)
 {
-  if(cmd >= 0)
+  if (cmd >= 0)
   {
-    digitalWrite(right_motor_pwm, 1); 
+    digitalWrite(right_motor_pwm, 1);
   }
   else
   {
     digitalWrite(right_motor_pwm, 0);
   }
-  analogWrite(right_motor_enable,abs(cmd));
+  analogWrite(right_motor_enable, abs(cmd));
 }
 
 

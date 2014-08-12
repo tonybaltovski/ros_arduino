@@ -14,8 +14,8 @@ generate_messages(DEPENDENCIES std_msgs)
 generate_dynamic_reconfigure_options(cfg/MotorGains.cfg)
 
 catkin_package(
-	 DEPENDS
-	 CATKIN_DEPENDS roscpp geometry_msgs ros_arduino_msgs tf dynamic_reconfigure
+   DEPENDS
+   CATKIN_DEPENDS roscpp geometry_msgs ros_arduino_msgs tf dynamic_reconfigure
    INCLUDE_DIRS include
    LIBRARIES ${PROJECT_NAME}
 )
@@ -50,7 +50,8 @@ install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}) 
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h") 
 
 install(DIRECTORY launch config cfg
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}) 

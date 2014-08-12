@@ -29,8 +29,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef ROS_ARDUINO_BASE_ROS_ARDUINO_BASE_H
-#define ROS_ARDUINO_BASE_ROS_ARDUINO_BASE_H
+#ifndef _ROS_ARDUINO_BASE_H_
+#define _ROS_ARDUINO_BASE_H_
 
 #include <math.h>
 #include <ros/ros.h>
@@ -93,4 +93,4 @@ public:
   ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
   virtual ~ROSArduinoBase();
 };
-#endif  // ROS_ARDUINO_BASE_ROS_ARDUINO_BASE_H
+#endif // _ROS_ARDUINO_BASE_H_
