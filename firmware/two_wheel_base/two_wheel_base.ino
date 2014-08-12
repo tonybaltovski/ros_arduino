@@ -242,7 +242,7 @@ void doControl(ControlData * ctrl)
   ctrl->command = cmd;
   ctrl->previous_time = ctrl->current_time;
   ctrl->previous_encoder = ctrl->current_encoder;
-  ctrl->previous_D_term= Kd * error - ctrl->previous_D_term;
+  ctrl->previous_D_term= Kd * error;
   
 }
 
