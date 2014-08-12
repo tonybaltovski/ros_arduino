@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>ros_arduino_imu</name>
+  <version>0.0.0</version>
+  <description>The ros-arduino-imu package</description>
+
+  <maintainer email="tony.baltovski@gmail.com">Tony Baltovski</maintainer>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>ros_arduino_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>ros_arduino_msgs</run_depend>
+</package>
