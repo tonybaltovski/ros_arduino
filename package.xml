@@ -13,12 +13,14 @@
   <build_depend>geometry_msgs</build_depend>
   <build_depend>ros_arduino_msgs</build_depend>
   <build_depend>tf</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>roslaunch</build_depend>
   <build_depend>roslint</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>geometry_msgs</run_depend>
-  <run_depend>tf</run_depend>
   <run_depend>ros_arduino_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>rosserial_python</run_depend>
 </package>
