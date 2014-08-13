@@ -1,5 +1,5 @@
-#ifndef _IMU_CONFIGURATION_H
-#define _IMU_CONFIGURATION_H
+#ifndef _IMU_CONFIGURATION_H_
+#define _IMU_CONFIGURATION_H_
 
 #include <Arduino.h>
 #include "imu_wire.h"
@@ -96,5 +96,5 @@
 #include "gyroscope.h"
 #include "magnetometer.h"
 
-#endif
+#endif  // _IMU_CONFIGURATION_H_
 

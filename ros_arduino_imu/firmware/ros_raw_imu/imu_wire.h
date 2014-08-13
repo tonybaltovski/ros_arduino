@@ -1,5 +1,5 @@
-#ifndef _IMU_WIRE_H
-#define _IMU_WIRE_H
+#ifndef _IMU_WIRE_H_
+#define _IMU_WIRE_H_
 
 #include <Arduino.h>
 
@@ -29,4 +29,4 @@ byte check_ID(int device_address, byte register_address) {
   return Wire.read();
 }
 
-#endif
+#endif  // _IMU_WIRE_H_

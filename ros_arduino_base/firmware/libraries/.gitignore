@@ -1,4 +1,4 @@
 # Ignore everything in this directory
-*
+ros_lib
 # Except this file
 !.gitignore

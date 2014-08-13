@@ -1,6 +1,6 @@
 // FINISH THIS AND TEST
-#ifndef _GYROSCOPE_L3G4200D_H
-#define _GYROSCOPE_L3G4200D_H
+#ifndef _GYROSCOPE_L3G4200D_H_
+#define _GYROSCOPE_L3G4200D_H_
 
 #include <Arduino.h>
 
@@ -38,4 +38,4 @@ geometry_msgs::Vector3 measure_gyroscope()
   return raw_rotation;
 }
 
-#endif
+#endif  // _GYROSCOPE_L3G4200D_H_

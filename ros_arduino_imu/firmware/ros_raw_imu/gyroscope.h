@@ -21,5 +21,5 @@ geometry_msgs::Vector3 measure_gyroscope();
 #include "gyroscope_L3G4200D.h"
 #endif
 
-#endif
+#endif  // _GYROSCOPE_H_
 

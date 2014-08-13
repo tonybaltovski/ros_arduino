@@ -1,5 +1,5 @@
-#ifndef _ACCELEROMETER_ADXL345_H
-#define _ACCELEROMETER_ADXL345_H
+#ifndef _ACCELEROMETER_ADXL345_H_
+#define _ACCELEROMETER_ADXL345_H_
 
 #include <Arduino.h>
 #include <math.h>
@@ -78,7 +78,7 @@ geometry_msgs::Vector3 measure_acceleration()
   return raw_acceleration;
 }
 
-#endif
+#endif  // _ACCELEROMETER_ADXL345_H_
 
 
 

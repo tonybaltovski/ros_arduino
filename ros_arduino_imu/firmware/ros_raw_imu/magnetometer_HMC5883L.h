@@ -1,5 +1,5 @@
-#ifndef _MEGNETOMETER_HMC5883L_H_
-#define _MEGNETOMETER_HMC5883L_H_
+#ifndef _MAGNETOMETER_HMC5883L_H_
+#define _MAGNETOMETER_HMC5883L_H_
 
 #define HMC5883L_MAG_ADDRESS 0x1E
 #define HMC5883L_MAG_ID 0x10
@@ -45,5 +45,5 @@ geometry_msgs::Vector3 measure_magnetometer()
   return raw_magnetic_field;
 }
 
-#endif
+#endif  // _MAGNETOMETER_HMC5883L_H_
 

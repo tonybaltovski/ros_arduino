@@ -19,5 +19,5 @@ geometry_msgs::Vector3 measure_acceleration();
 #include "accelerometer_ADXL345.h"
 #endif
 
-#endif
+#endif  // _ACCELEROMETER_H_
 

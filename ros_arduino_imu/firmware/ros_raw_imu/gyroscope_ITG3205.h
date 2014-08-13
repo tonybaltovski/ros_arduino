@@ -1,5 +1,5 @@
-#ifndef _GYROSCOPE_ITFG3205_H
-#define _GYROSCOPE_ITFG3205_H
+#ifndef _GYROSCOPE_ITFG3205_H_
+#define _GYROSCOPE_ITFG3205_H_
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -75,5 +75,5 @@ geometry_msgs::Vector3 measure_gyroscope()
   raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_Z_AXIS] <<8) | buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Z_AXIS];
   return raw_rotation;
 }
-#endif
+#endif  // _GYROSCOPE_ITFG3205_H_
 
