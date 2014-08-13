@@ -2,22 +2,22 @@ ros-arduino-imu
 ===============
 This a repo to interface various IMU boards connected to Adruino and Arduino-like microcontrollers via rosserial to ROS.
 
-##Current IMUs
+## Current IMUs ##
 - Sparkfun SEN-10724
-
-##Inprogress
 - Generic GY-80
+
+## Inprogress ##
 - Generic GY-85
 
-##Individial sensors
-### Accelerometers
+## Individial sensors ##
+### Accelerometers ###
 - ADXL345
-###Gyroscopes
+### Gyroscopes ###
 - ITG32000(ITG3205)
 - L3G4200D [inprogress]
-###Magnetometers
+### Magnetometers  ###
 - HMC5883L
-###Barometer
+### Barometer ###
 - BMP180 [inprogress]
 
 
