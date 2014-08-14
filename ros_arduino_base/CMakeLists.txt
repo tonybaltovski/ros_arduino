@@ -56,7 +56,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(DIRECTORY launch config cfg
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}) 
 
-roslint_cpp()
+file(GLOB ${PROJECT_NAME}_LINT_SRCS
+  src/*.cpp)
+roslint_cpp(${LINT_SRCS})
 roslint_add_test()
+
 roslaunch_add_file_check(launch/base_bringup.launch)
 
