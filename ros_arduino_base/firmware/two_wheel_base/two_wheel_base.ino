@@ -39,6 +39,17 @@
 #include "user_config.h"
 #include "motor_driver_config.h"
 
+typedef struct {
+  float desired_velocity;  // [m/s]
+  uint32_t current_time;  // [miliseconds]
+  uint32_t previous_time;  // [miliseconds]
+  long current_encoder;  // [counts]
+  long previous_encoder;  // [counts]
+  float previous_D_term;  // 
+  float total_I_term;  // 
+  int command; // [PWM]
+}
+ControlData;
 
 // Encoder objects from PJRC encoder library.
 Encoder left_encoder(LEFT_ENCODER_A,LEFT_ENCODER_B);
@@ -51,18 +62,6 @@ int encoder_on_motor_shaft[1];
 float wheel_radius[1]; // [m]
 float meters_per_counts;  // [m/counts]
 int pwm_range[1];
-
-typedef struct {
-  float desired_velocity;  // [m/s]
-  uint32_t current_time;  // [miliseconds]
-  uint32_t previous_time;  // [miliseconds]
-  long current_encoder;  // [counts]
-  long previous_encoder;  // [counts]
-  float previous_D_term;  // 
-  float total_I_term;  // 
-  int command; // [PWM]
-}
-ControlData;
 
 // Gains;
 float pid_gains[3];
@@ -264,11 +263,11 @@ void Control()
     
   if(right_motor_controller.desired_velocity > 0 || right_motor_controller.desired_velocity < 0)
   {
-      commandLeftMotor(right_motor_controller.command);
+      commandRightMotor(right_motor_controller.command);
   }
   else
   {
-      commandLeftMotor(0);
+      commandRightMotor(0);
   }
 }
 
