@@ -132,7 +132,7 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   geometry_msgs::TransformStamped odom_trans;
   odom_trans.header.stamp = encoder_current_time_;
   odom_trans.header.frame_id = "odom";
-  odom_trans.child_frame_id = "base_footprint";
+  odom_trans.child_frame_id = "base_link";
   odom_trans.transform.translation.x = x_;
   odom_trans.transform.translation.y = y_;
   odom_trans.transform.translation.z = 0.0;
@@ -141,7 +141,7 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
 
   odom.header.stamp = encoder_current_time_;
   odom.header.frame_id = "odom";
-  odom.child_frame_id = "base_footprint";
+  odom.child_frame_id = "base_link";
   odom.pose.pose.position.x = x_;
   odom.pose.pose.position.y = y_;
   odom.pose.pose.position.z = 0.0;
