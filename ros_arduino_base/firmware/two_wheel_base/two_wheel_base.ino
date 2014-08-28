@@ -33,7 +33,10 @@
 #include <ros_arduino_base/UpdateGains.h>
 #include <ros_arduino_msgs/Encoders.h>
 #include <ros_arduino_msgs/CmdDiffVel.h>
+
+#define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
+
 #include <PololuMC33926.h>
 
 #include "user_config.h"
