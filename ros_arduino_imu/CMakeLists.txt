@@ -27,9 +27,11 @@ include_directories(
 link_directories(${catkin_LIBRARY_DIRS})
 
 add_executable(arduino_magnometer_calibration src/arduino_magnometer_calibration.cpp)
+add_dependencies(arduino_magnometer_calibration ros_arduino_msgs_generate_messages_cpp)
 target_link_libraries(arduino_magnometer_calibration ${catkin_LIBRARIES})
 
 add_executable(raw_imu_bridge src/raw_imu_bridge.cpp)
+add_dependencies(raw_imu_bridge ros_arduino_msgs_generate_messages_cpp)
 target_link_libraries(raw_imu_bridge ${catkin_LIBRARIES})
 
 #############
