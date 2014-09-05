@@ -73,8 +73,8 @@ int main(int argc, char **argv)
   ros::param::param<float>("mag_y_max", M_Y_MAX, M_Y_MAX);
   ros::param::param<float>("mag_z_max", M_Z_MAX, M_Z_MAX);
 
-  ros::Publisher imu_pub = n.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
-  ros::Publisher mag_pub = n.advertise<geometry_msgs::Vector3Stamped>("imu/mag", 1);
+  imu_pub = n.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
+  mag_pub = n.advertise<geometry_msgs::Vector3Stamped>("imu/mag", 1);
 
   ros::Subscriber raw_sub = n.subscribe("raw_imu", 1, rawCallback);
 
