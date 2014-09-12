@@ -48,8 +48,8 @@ typedef struct {
   uint32_t previous_time;  // [miliseconds]
   long current_encoder;  // [counts]
   long previous_encoder;  // [counts]
-  float previous_D_term;  // 
-  float total_I_term;  // 
+  float previous_error;  // 
+  float total_error;  // 
   int command; // [PWM]
 }
 ControlData;
@@ -96,12 +96,6 @@ void cmdDiffVelCallback(const ros_arduino_msgs::CmdDiffVel& diff_vel_msg);
 // ROS subsribers
 ros::Subscriber<ros_arduino_msgs::CmdDiffVel> sub_diff_vel("cmd_diff_vel", cmdDiffVelCallback);
 
-// ROS services prototype
-void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res);
-
-// ROS services
-ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::UpdateGains::Response> update_gains_server("update_gains", &updateGainsCb);
-
 // ROS publishers msgs
 ros_arduino_msgs::Encoders encoders_msg;
 // ROS publishers
@@ -139,9 +133,9 @@ void setup()
   }
   if (!nh.getParam("pid_gains", pid_gains,3))
   { 
-    pid_gains[0] = 200;  // Kp
-    pid_gains[1] =  0;  // Ki
-    pid_gains[2] = 150;  // Kd
+    pid_gains[0] = 20;  // Kp
+    pid_gains[1] =  1;  // Ki
+    pid_gains[2] = 15;  // Kd
   }
 
   if (!nh.getParam("counts_per_rev", counts_per_rev,1))
@@ -176,8 +170,8 @@ void setup()
   }
   // Create PID gains for this specific control rate
   Kp = pid_gains[0];
-  Ki = pid_gains[1] / control_rate[0];
-  Kd = pid_gains[2] * control_rate[0];
+  Ki = pid_gains[1]; // / control_rate[0];
+  Kd = pid_gains[2]; // * control_rate[0];
 } 
 
 
@@ -224,7 +218,7 @@ void doControl(ControlData * ctrl)
 {
   float estimated_velocity = meters_per_counts * (ctrl->current_encoder - ctrl->previous_encoder) * 1000.0 / (ctrl->current_time - ctrl->previous_time);
   float error = ctrl->desired_velocity - estimated_velocity;
-  float cmd = Kp * error + Ki * error + ctrl->total_I_term + Kd * error - ctrl->previous_D_term;
+  float cmd = Kp * error + Ki * (error + ctrl->total_error) + Kd * (error - ctrl->previous_error);
   
   cmd += ctrl->command;
   
@@ -239,13 +233,13 @@ void doControl(ControlData * ctrl)
   }
   else
   {
-    ctrl->total_I_term += Ki * error;
+    ctrl->total_error += error;
   }
   
   ctrl->command = cmd;
   ctrl->previous_time = ctrl->current_time;
   ctrl->previous_encoder = ctrl->current_encoder;
-  ctrl->previous_D_term= Kd * error;
+  ctrl->previous_error = error;
   
 }
 
@@ -255,6 +249,13 @@ void Control()
   
   doControl(&left_motor_controller);
   doControl(&right_motor_controller);
+  
+  //char p[5];		
+  //String str;		
+  //str=String(left_motor_controller.command);		
+  //str.toCharArray(p,5);		
+  //nh.loginfo(p);
+  
   if(left_motor_controller.desired_velocity > 0 || left_motor_controller.desired_velocity < 0)
   {
       commandLeftMotor(left_motor_controller.command);
@@ -274,16 +275,6 @@ void Control()
   }
 }
 
-void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res)
-{
-  pid_gains[0] = req.p;
-  pid_gains[1] = req.i; 
-  pid_gains[2] = req.d;
-  
-  Kp = pid_gains[0];
-  Ki = pid_gains[1] / control_rate[0];
-  Kd = pid_gains[2] * control_rate[0];
-}
 
 
 
