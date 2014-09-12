@@ -2,8 +2,8 @@
 #define _USER_CONFIG_H_
 
 // Select your motor driver here
-//#define PololuMC33926
-#define DFRobotL298PShield
+#define PololuMC33926
+//#define DFRobotL298PShield
 // Define your encoder pins here.
 // Try to use pins that have interrupts
 // Left side encoders pins
