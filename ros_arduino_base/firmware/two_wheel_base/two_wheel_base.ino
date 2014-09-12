@@ -96,6 +96,11 @@ void cmdDiffVelCallback(const ros_arduino_msgs::CmdDiffVel& diff_vel_msg);
 // ROS subsribers
 ros::Subscriber<ros_arduino_msgs::CmdDiffVel> sub_diff_vel("cmd_diff_vel", cmdDiffVelCallback);
 
+// ROS services prototype
+void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res);
+
+// ROS services
+ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::UpdateGains::Response> update_gains_server("update_gains", &updateGainsCb);
 
 // ROS publishers msgs
 ros_arduino_msgs::Encoders encoders_msg;
@@ -250,11 +255,6 @@ void Control()
   
   doControl(&left_motor_controller);
   doControl(&right_motor_controller);
-  char p[3];
-  String str;
-  str=String(left_motor_controller.command);
-  str.toCharArray(p,3);
-          nh.loginfo(p);
   if(left_motor_controller.desired_velocity > 0 || left_motor_controller.desired_velocity < 0)
   {
       commandLeftMotor(left_motor_controller.command);
@@ -274,6 +274,16 @@ void Control()
   }
 }
 
+void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res)
+{
+  pid_gains[0] = req.p;
+  pid_gains[1] = req.i; 
+  pid_gains[2] = req.d;
+  
+  Kp = pid_gains[0];
+  Ki = pid_gains[1] / control_rate[0];
+  Kd = pid_gains[2] * control_rate[0];
+}
 
 
 
