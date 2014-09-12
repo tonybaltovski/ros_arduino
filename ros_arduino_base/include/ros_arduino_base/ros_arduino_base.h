@@ -40,9 +40,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
-#include <ros_arduino_base/MotorGainsConfig.h>
-#include <ros_arduino_base/UpdateGains.h>
-#include <dynamic_reconfigure/server.h>
 
 class ROSArduinoBase
 {

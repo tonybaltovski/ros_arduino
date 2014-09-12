@@ -50,7 +50,6 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   encoders_sub_ = nh_.subscribe("encoders", 5, &ROSArduinoBase::encodersCallback, this,
                                     ros::TransportHints().unreliable().reliable().tcpNoDelay());
   cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, &ROSArduinoBase::cmdVelCallback, this);
-  gain_server_.setCallback(f);
 
   // ROS driver params
   nh_private.param<double>("counts_per_rev", counts_per_rev_, 48.0);
