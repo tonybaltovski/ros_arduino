@@ -118,7 +118,7 @@ void setup()
     nh.spinOnce();
   }
   nh.loginfo("Connected to microcontroller.");
-  
+
   if (!nh.getParam("control_rate", control_rate,1))
   {
     control_rate[0] = 50;
@@ -172,6 +172,8 @@ void setup()
   Kp = pid_gains[0];
   Ki = pid_gains[1]; // / control_rate[0];
   Kd = pid_gains[2]; // * control_rate[0];
+  
+  setupMotors();
 } 
 
 
@@ -189,7 +191,7 @@ void loop()
     Control();
     last_control_time = millis();
   }
-  
+
   // Stop motors after a period of no commands
   if((millis() - last_cmd_time) >= (no_cmd_timeout[0] * 1000))
   {
@@ -219,9 +221,9 @@ void doControl(ControlData * ctrl)
   float estimated_velocity = meters_per_counts * (ctrl->current_encoder - ctrl->previous_encoder) * 1000.0 / (ctrl->current_time - ctrl->previous_time);
   float error = ctrl->desired_velocity - estimated_velocity;
   float cmd = Kp * error + Ki * (error + ctrl->total_error) + Kd * (error - ctrl->previous_error);
-  
+
   cmd += ctrl->command;
-  
+
 
   if(cmd >= pwm_range[0])
   {
@@ -235,45 +237,41 @@ void doControl(ControlData * ctrl)
   {
     ctrl->total_error += error;
   }
-  
+
   ctrl->command = cmd;
   ctrl->previous_time = ctrl->current_time;
   ctrl->previous_encoder = ctrl->current_encoder;
   ctrl->previous_error = error;
-  
+
 }
 
 void Control()
 {
   updateControl();
-  
+
   doControl(&left_motor_controller);
   doControl(&right_motor_controller);
-  
-  //char p[5];		
-  //String str;		
-  //str=String(left_motor_controller.command);		
-  //str.toCharArray(p,5);		
-  //nh.loginfo(p);
-  
+
+
   if(left_motor_controller.desired_velocity > 0 || left_motor_controller.desired_velocity < 0)
   {
-      commandLeftMotor(left_motor_controller.command);
+    commandLeftMotor(left_motor_controller.command);
   }
   else
   {
-      commandLeftMotor(0);
+    commandLeftMotor(0);
   }
-    
+
   if(right_motor_controller.desired_velocity > 0 || right_motor_controller.desired_velocity < 0)
   {
-      commandRightMotor(right_motor_controller.command);
+    commandRightMotor(right_motor_controller.command);
   }
   else
   {
-      commandRightMotor(0);
+    commandRightMotor(0);
   }
 }
+
 
 
 
