@@ -68,7 +68,7 @@ int pwm_range[1];
 
 // Gains;
 float pid_gains[3];
-double Kp, Ki, Kd;
+float Kp, Ki, Kd;
 
 // Structures containing PID data
 ControlData left_motor_controller;
@@ -95,6 +95,11 @@ void cmdDiffVelCallback(const ros_arduino_msgs::CmdDiffVel& diff_vel_msg);
 
 // ROS subsribers
 ros::Subscriber<ros_arduino_msgs::CmdDiffVel> sub_diff_vel("cmd_diff_vel", cmdDiffVelCallback);
+
+// ROS services prototype
+void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res);
+// ROS services
+ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::UpdateGains::Response> update_gains_server("update_gains", &updateGainsCb);
 
 // ROS publishers msgs
 ros_arduino_msgs::Encoders encoders_msg;
@@ -133,9 +138,9 @@ void setup()
   }
   if (!nh.getParam("pid_gains", pid_gains,3))
   { 
-    pid_gains[0] = 20;  // Kp
-    pid_gains[1] =  1;  // Ki
-    pid_gains[2] = 15;  // Kd
+    pid_gains[0] = 150;  // Kp
+    pid_gains[1] =   0;  // Ki
+    pid_gains[2] =  20;  // Kd
   }
 
   if (!nh.getParam("counts_per_rev", counts_per_rev,1))
@@ -170,9 +175,10 @@ void setup()
   }
   // Create PID gains for this specific control rate
   Kp = pid_gains[0];
-  Ki = pid_gains[1]; // / control_rate[0];
-  Kd = pid_gains[2]; // * control_rate[0];
+  Ki = pid_gains[1] / control_rate[0];
+  Kd = pid_gains[2] * control_rate[0];
   
+  // Initialize the motors
   setupMotors();
 } 
 
@@ -224,7 +230,6 @@ void doControl(ControlData * ctrl)
 
   cmd += ctrl->command;
 
-
   if(cmd >= pwm_range[0])
   {
     cmd = pwm_range[0];
@@ -272,6 +277,16 @@ void Control()
   }
 }
 
+void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res)
+{
+  pid_gains[0] = req.p;
+  pid_gains[1] = req.i; 
+  pid_gains[2] = req.d;
+  
+  Kp = pid_gains[0];
+  Ki = pid_gains[1] / control_rate[0];
+  Kd = pid_gains[2] * control_rate[0];
+}
 
 
 

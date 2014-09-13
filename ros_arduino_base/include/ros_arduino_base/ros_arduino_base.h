@@ -40,6 +40,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
+#include <ros_arduino_base/MotorGainsConfig.h>
+#include <ros_arduino_base/UpdateGains.h>
+#include <dynamic_reconfigure/server.h>
 
 class ROSArduinoBase
 {
@@ -52,6 +55,10 @@ private:
   // Publishers
   ros::Publisher odom_pub_;
   ros::Publisher cmd_diff_vel_pub_;
+  // Services
+  ros::ServiceClient update_gains_client_;
+  // Dynamic Reconfigure
+  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig> gain_server_;
   // Members
   ros::Time encoder_current_time_;
   ros::Time encoder_previous_time_;
@@ -80,6 +87,7 @@ private:
   // ROS Member functions
   void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
   void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
+  void motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level);
 
 public:
   ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
