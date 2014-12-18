@@ -13,35 +13,35 @@ void raw_imu_callback(const ros_arduino_msgs::RawImuConstPtr& raw_msg){
   my = raw_msg->raw_magnetic_field.y;
   mz = raw_msg->raw_magnetic_field.z;
   
-  if(mx>mxh)
+  if(mx > mxh)
   {
-    mxh=mx;
-    update=true;
+    mxh = mx;
+    update = true;
   }
-  else if(mx<mxl)
+  else if(mx < mxl)
   {
-    mxl=mx;
-    update=true;
+    mxl = mx;
+    update = true;
   }
-  if(my>myh)
+  if(my > myh)
   {
-    myh=my;
-    update=true;
+    myh = my;
+    update = true;
   }
-  else if(my<myl)
+  else if( my < myl)
   {
-    myl=my;
-    update=true;
+    myl = my;
+    update = true;
   }
-  if(mz>mzh)
+  if(mz > mzh)
   {
-    mzh=mz;
-    update=true;
+    mzh = mz;
+    update = true;
   }
-  else if(mz<mzl)
+  else if(mz < mzl)
   {
-    mzl=mz;
-    update=true;
+    mzl = mz;
+    update = true;
   }
 
   if (update)
@@ -58,5 +58,4 @@ int main(int argc, char **argv){
   ros::Subscriber raw_imu_sub = n.subscribe("raw_imu", 1, raw_imu_callback);
   
   ros::spin();
-  return 0;
 }

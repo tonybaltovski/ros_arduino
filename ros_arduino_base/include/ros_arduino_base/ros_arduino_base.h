@@ -46,51 +46,51 @@ POSSIBILITY OF SUCH DAMAGE.
 
 class ROSArduinoBase
 {
-private:
-  ros::NodeHandle nh_;
-  ros::NodeHandle nh_private_;
-  // Subsribers
-  ros::Subscriber encoders_sub_;
-  ros::Subscriber cmd_vel_sub_;
-  // Publishers
-  ros::Publisher odom_pub_;
-  ros::Publisher cmd_diff_vel_pub_;
-  // Services
-  ros::ServiceClient update_gains_client_;
-  // Dynamic Reconfigure
-  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig> gain_server_;
-  // Members
-  ros::Time encoder_current_time_;
-  ros::Time encoder_previous_time_;
-  tf::TransformBroadcaster *odom_broadcaster_;
-  // Odom variables
-  double x_;  // [m]
-  double y_;  // [m]
-  double theta_;  // [radians]
-  double dx_;  // [m/s]
-  double dy_;  // [m/s]
-  double dtheta_;  // [radians/s]
-  // Encoder variables
-  int64_t right_counts_;  // [counts]
-  int64_t left_counts_;   // [counts]
-  int64_t old_right_counts_;  // [counts]
-  int64_t old_left_counts_;   // [counts]
-  // Control variables
-  double gains_[3];
-  // Vehicle characteristics
-  double counts_per_rev_;  // [counts/rev]
-  double gear_ratio_;
-  int encoder_on_motor_shaft_;
-  double wheel_radius_;  // [m]
-  double base_width_;  // [m]
-  double meters_per_counts_;  // [m/counts]
-  // ROS Member functions
-  void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
-  void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
-  void motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level);
+  private:
+    ros::NodeHandle nh_;
+    ros::NodeHandle nh_private_;
+    // Subsribers
+    ros::Subscriber encoders_sub_;
+    ros::Subscriber cmd_vel_sub_;
+    // Publishers
+    ros::Publisher odom_pub_;
+    ros::Publisher cmd_diff_vel_pub_;
+    // Services
+    ros::ServiceClient update_gains_client_;
+    // Dynamic Reconfigure
+    dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig> gain_server_;
+    // Members
+    ros::Time encoder_current_time_;
+    ros::Time encoder_previous_time_;
+    tf::TransformBroadcaster *odom_broadcaster_;
+    // Odom variables
+    double x_;  // [m]
+    double y_;  // [m]
+    double theta_;  // [radians]
+    double dx_;  // [m/s]
+    double dy_;  // [m/s]
+    double dtheta_;  // [radians/s]
+    // Encoder variables
+    int64_t right_counts_;  // [counts]
+    int64_t left_counts_;   // [counts]
+    int64_t old_right_counts_;  // [counts]
+    int64_t old_left_counts_;   // [counts]
+    // Control variables
+    double gains_[3];
+    // Vehicle characteristics
+    double counts_per_rev_;  // [counts/rev]
+    double gear_ratio_;
+    int encoder_on_motor_shaft_;
+    double wheel_radius_;  // [m]
+    double base_width_;  // [m]
+    double meters_per_counts_;  // [m/counts]
+    // ROS Member functions
+    void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
+    void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
+    void motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level);
 
-public:
-  ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
-  virtual ~ROSArduinoBase();
+  public:
+    ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
+    virtual ~ROSArduinoBase();
 };
 #endif // _ROS_ARDUINO_BASE_H_

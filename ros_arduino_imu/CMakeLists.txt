@@ -8,7 +8,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 
 catkin_package(
-   #INCLUDE_DIRS include
+   INCLUDE_DIRS include
    #LIBRARIES
    CATKIN_DEPENDS roscpp sensor_msgs geometry_msgs ros_arduino_msgs
 #  DEPENDS system_lib
@@ -19,7 +19,7 @@ catkin_package(
 ###########
 
 include_directories(
-  #include
+  include
   ${catkin_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
 )
@@ -30,9 +30,14 @@ add_executable(arduino_magnometer_calibration src/arduino_magnometer_calibration
 add_dependencies(arduino_magnometer_calibration ros_arduino_msgs_generate_messages_cpp)
 target_link_libraries(arduino_magnometer_calibration ${catkin_LIBRARIES})
 
-add_executable(raw_imu_bridge src/raw_imu_bridge.cpp)
+## Declare a cpp library
+add_library(raw_imu_bridge src/raw_imu_bridge.cpp)
 add_dependencies(raw_imu_bridge ros_arduino_msgs_generate_messages_cpp)
 target_link_libraries(raw_imu_bridge ${catkin_LIBRARIES})
+
+add_executable(raw_imu_bridge_node src/raw_imu_bridge_node.cpp)
+add_dependencies(raw_imu_bridge_node raw_imu_bridge ros_arduino_msgs_generate_messages_cpp)
+target_link_libraries(raw_imu_bridge_node raw_imu_bridge ${catkin_LIBRARIES})
 
 #############
 ## Install ##

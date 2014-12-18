@@ -87,7 +87,7 @@ void loop()
       else
       {
         raw_imu_msg.header.stamp = nh.now();
-        raw_imu_msg.header.frame_id = "/imu";
+        raw_imu_msg.header.frame_id = "/imu_link";
         if (raw_imu_msg.accelerometer)
         {
           raw_imu_msg.raw_linear_acceleration = measure_acceleration();

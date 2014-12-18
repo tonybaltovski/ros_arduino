@@ -52,9 +52,9 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, &ROSArduinoBase::cmdVelCallback, this);
   update_gains_client_ = nh.serviceClient<ros_arduino_base::UpdateGains>("update_gains");
   dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType f = 
-	                                  boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
+                                   boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
   gain_server_.setCallback(f);
-		
+
   // ROS driver params
   nh_private.param<double>("counts_per_rev", counts_per_rev_, 48.0);
   nh_private.param<double>("gear_ratio", gear_ratio_, (75.0 / 1.0));
@@ -70,6 +70,7 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   {
     meters_per_counts_ = ((M_PI * 2 * wheel_radius_) / counts_per_rev_);
   }
+  ROS_INFO("Starting ROS Arduino Base");
 }
 
 ROSArduinoBase::~ROSArduinoBase()
