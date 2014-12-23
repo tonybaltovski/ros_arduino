@@ -58,8 +58,12 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   // ROS driver params
   nh_private.param<std::string>("odom/odom_frame_id", odom_frame_, "odom");
   nh_private.param<std::string>("odom/base_frame_id", base_frame_, "base_link");
-  nh_private.param<double>("pose_stdev", pose_stdev_, 0.01);
-  nh_private.param<double>("twist_stdev", twist_stdev_, 0.01);
+  nh_private.param<double>("pose_stdev/x", pose_x_stdev_, 0.01);
+  nh_private.param<double>("pose_stdev/y", pose_y_stdev_, 0.01);
+  nh_private.param<double>("pose_stdev/yaw", pose_yaw_stdev_, 0.01);
+  nh_private.param<double>("twist_stdev/x", twist_x_stdev_, 0.01);
+  nh_private.param<double>("twist_stdev/y", twist_y_stdev_, 0.01);
+  nh_private.param<double>("twist_stdev/yaw", twist_yaw_stdev_, 0.01);
   nh_private.param<double>("counts_per_rev", counts_per_rev_, 48.0);
   nh_private.param<double>("gear_ratio", gear_ratio_, (75.0 / 1.0));
   nh_private.param<int>("encoder_on_motor_shaft", encoder_on_motor_shaft_, 1);
@@ -74,8 +78,8 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   {
     meters_per_counts_ = ((M_PI * 2 * wheel_radius_) / counts_per_rev_);
   }
-  ROSArduinoBase::fillCovar(pose_covar_, pose_stdev_);
-  ROSArduinoBase::fillCovar(twist_covar_, twist_stdev_);
+  ROSArduinoBase::fillCovar(pose_covar_, pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_);
+  ROSArduinoBase::fillCovar(twist_covar_, twist_x_stdev_, twist_y_stdev_, twist_yaw_stdev_);
 
   ROS_INFO("Starting ROS Arduino Base");
 }
@@ -170,13 +174,13 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   old_left_counts_ = left_counts_;
 }
 
-void ROSArduinoBase::fillCovar(boost::array<double, 36> & covar, double stdev)
+void ROSArduinoBase::fillCovar(boost::array<double, 36> & covar, double x_stdev, double y_stdev, double yaw_stdev)
 {
   std::fill(covar.begin(), covar.end(), 0.0);
-  covar[0] = pow(stdev, 2);  // X
-  covar[7] = pow(stdev, 2);  // Y
+  covar[0] = pow(x_stdev, 2);  // X
+  covar[7] = pow(y_stdev, 2);  // Y
   covar[14] = 1e6;  // Z
   covar[21] = 1e6;  // roll
   covar[28] = 1e6;  // pitch
-  covar[35] = pow(stdev, 2);  // yaw(theta)
+  covar[35] = pow(yaw_stdev, 2);  // yaw(theta)
 }

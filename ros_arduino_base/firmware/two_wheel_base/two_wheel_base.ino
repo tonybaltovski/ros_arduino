@@ -46,8 +46,8 @@ typedef struct {
   float desired_velocity;  // [m/s]
   uint32_t current_time;  // [miliseconds]
   uint32_t previous_time;  // [miliseconds]
-  long current_encoder;  // [counts]
-  long previous_encoder;  // [counts]
+  int32_t current_encoder;  // [counts]
+  int32_t previous_encoder;  // [counts]
   float previous_error;  // 
   float total_error;  // 
   int command; // [PWM]
