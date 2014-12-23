@@ -60,27 +60,21 @@ class ROSArduinoBase
     // Dynamic Reconfigure
     dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig> gain_server_;
     // Members
-    ros::Time encoder_current_time_;
-    ros::Time encoder_previous_time_;
+    ros::Time encoder_current_time_, encoder_previous_time_;
     tf::TransformBroadcaster *odom_broadcaster_;
-    std::string base_frame_;
-    std::string odom_frame_;
+    std::string base_frame_, odom_frame_;
     double pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_;
     double twist_x_stdev_, twist_y_stdev_, twist_yaw_stdev_;
     boost::array<double, 36> pose_covar_;
     boost::array<double, 36> twist_covar_;
     // Odom variables
-    double x_;  // [m]
-    double y_;  // [m]
+    double x_, y_;  // [m]
     double theta_;  // [radians]
-    double dx_;  // [m/s]
-    double dy_;  // [m/s]
+    double dx_, dy_;  // [m/s]
     double dtheta_;  // [radians/s]
     // Encoder variables
-    int64_t right_counts_;  // [counts]
-    int64_t left_counts_;   // [counts]
-    int64_t old_right_counts_;  // [counts]
-    int64_t old_left_counts_;   // [counts]
+    int32_t right_counts_, left_counts_;  // [counts]
+    int32_t old_right_counts_, old_left_counts_;  // [counts]
     // Control variables
     double gains_[3];
     // Vehicle characteristics
