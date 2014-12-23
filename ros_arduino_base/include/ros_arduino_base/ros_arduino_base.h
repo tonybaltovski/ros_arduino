@@ -63,6 +63,11 @@ class ROSArduinoBase
     ros::Time encoder_current_time_;
     ros::Time encoder_previous_time_;
     tf::TransformBroadcaster *odom_broadcaster_;
+    std::string base_frame_;
+    std::string odom_frame_;
+    double pose_stdev_, twist_stdev_;
+    boost::array<double, 36> pose_covar_;
+    boost::array<double, 36> twist_covar_;
     // Odom variables
     double x_;  // [m]
     double y_;  // [m]
@@ -88,7 +93,8 @@ class ROSArduinoBase
     void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
     void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
     void motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level);
-
+    // Other Member functions
+    void fillCovar(boost::array<double, 36> & covar, double stdev);
   public:
     ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
     virtual ~ROSArduinoBase();

@@ -43,8 +43,7 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   
 
   // Fill covar matrices
-  
-// Magnetometer calibration values.
+  // Magnetometer calibration values.
   pnh.param<double>("mag/x/min", mag_x_min_, -574);
   pnh.param<double>("mag/x/max", mag_x_max_,  638);
   pnh.param<double>("mag/y/min", mag_y_min_, -520);
@@ -121,16 +120,10 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
     }
 }
 
-void RawImuBridge::fillRowMajor(boost::array<double, 9> & covar, double stdev) {
-    std::fill(covar.begin(), covar.end(), 0.0f);
-    if (stdev <= 0.0)
-    {
-      covar[0] = -1.0;
-    }
-    else
-    {
-      covar[0] = pow(stdev, 2);  // X
-      covar[4] = pow(stdev, 2);  // Y
-      covar[8] = pow(stdev, 2);  // Z
-    }
-  }
+void RawImuBridge::fillRowMajor(boost::array<double, 9> & covar, double stdev)
+{
+  std::fill(covar.begin(), covar.end(), 0.0);
+  covar[0] = pow(stdev, 2);  // X(roll)
+  covar[4] = pow(stdev, 2);  // Y(pitch)
+  covar[8] = pow(stdev, 2);  // Z(yaw)
+}

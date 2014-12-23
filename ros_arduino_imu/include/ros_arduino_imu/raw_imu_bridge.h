@@ -54,7 +54,7 @@ class RawImuBridge
     ros::Subscriber raw_sub_;
     // ROS Member functions
     void rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg);
-    void fillRowMajor(boost::array<double, 9> & covaw, double stdev);
+    void fillRowMajor(boost::array<double, 9> & covar, double stdev);
   public:
     RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh);
     virtual ~RawImuBridge();
