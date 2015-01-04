@@ -280,9 +280,10 @@ void Control()
 
 void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res)
 {
-  pid_gains[0] = req.p;
-  pid_gains[1] = req.i; 
-  pid_gains[2] = req.d;
+  for ( int x = 0; x < 3; x++)
+  {
+    pid_gains[x] = req.gains[x];
+  }
   
   Kp = pid_gains[0];
   Ki = pid_gains[1] / control_rate[0];

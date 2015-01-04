@@ -106,12 +106,13 @@ void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &conf
   gains_[1] = config.K_I;
   gains_[2] = config.K_D;
   ros_arduino_base::UpdateGains srv;
-  srv.request.p = gains_[0];
-  srv.request.i = gains_[1];
-  srv.request.d = gains_[2];
+  for (int i = 0; i < 3; i++)
+  {
+    srv.request.gains[i] = gains_[i];
+  }
   if (update_gains_client_.call(srv))
   {
-    ROS_INFO("Motor Gains changed to P:%f I:%f D: %f",gains_[0],gains_[1],gains_[2]);
+    ROS_INFO("Motor Gains changed to P:%f I:%f D: %f", gains_[0], gains_[1], gains_[2]);
   }
   else
   {
