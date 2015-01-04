@@ -97,7 +97,7 @@ void cmdDiffVelCallback(const ros_arduino_msgs::CmdDiffVel& diff_vel_msg);
 ros::Subscriber<ros_arduino_msgs::CmdDiffVel> sub_diff_vel("cmd_diff_vel", cmdDiffVelCallback);
 
 // ROS services prototype
-void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res);
+void updateGainsCb(const ros_arduino_base::UpdateGains::Request &req, ros_arduino_base::UpdateGains::Response &res);
 // ROS services
 ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::UpdateGains::Response> update_gains_server("update_gains", &updateGainsCb);
 
@@ -116,7 +116,8 @@ void setup()
   // Pub/Sub
   nh.advertise(pub_encoders);
   nh.subscribe(sub_diff_vel);
-
+  nh.advertiseService(update_gains_server);
+  
   // Wait for ROSserial to connect
   while (!nh.connected()) 
   {
