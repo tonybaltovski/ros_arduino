@@ -56,6 +56,7 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   gain_server_.setCallback(f);
 
   // ROS driver params
+  nh_private.param<bool>("publish_tf", publish_tf_, false);
   nh_private.param<std::string>("odom/odom_frame_id", odom_frame_, "odom");
   nh_private.param<std::string>("odom/base_frame_id", base_frame_, "base_link");
   nh_private.param<double>("pose_stdev/x", pose_x_stdev_, 0.01);
@@ -122,7 +123,6 @@ void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &conf
 void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg)
 {
   encoder_current_time_ = ros::Time::now();
-  odom_broadcaster_ = new tf::TransformBroadcaster();
   nav_msgs::Odometry odom;
   left_counts_ = encoders_msg->left;
   right_counts_ = encoders_msg->right;
@@ -141,15 +141,20 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   theta_ += delta_theta;  // [radians]
   geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
-  geometry_msgs::TransformStamped odom_trans;
-  odom_trans.header.stamp = encoder_current_time_;
-  odom_trans.header.frame_id = odom_frame_;
-  odom_trans.child_frame_id = base_frame_;
-  odom_trans.transform.translation.x = x_;
-  odom_trans.transform.translation.y = y_;
-  odom_trans.transform.translation.z = 0.0;
-  odom_trans.transform.rotation = odom_quat;
-  odom_broadcaster_->sendTransform(odom_trans);
+  if (publish_tf_)
+  {
+    odom_broadcaster_ = new tf::TransformBroadcaster();
+    geometry_msgs::TransformStamped odom_trans;
+    odom_trans.header.stamp = encoder_current_time_;
+    odom_trans.header.frame_id = odom_frame_;
+    odom_trans.child_frame_id = base_frame_;
+    odom_trans.transform.translation.x = x_;
+    odom_trans.transform.translation.y = y_;
+    odom_trans.transform.translation.z = 0.0;
+    odom_trans.transform.rotation = odom_quat;
+    odom_broadcaster_->sendTransform(odom_trans);
+  }
+
 
   odom.header.stamp = encoder_current_time_;
   odom.header.frame_id = odom_frame_;

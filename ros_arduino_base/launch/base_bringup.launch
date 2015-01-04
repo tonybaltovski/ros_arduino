@@ -1,9 +1,10 @@
 <launch>
-	<rosparam file="$(find ros_arduino_base)/config/default.yaml" command="load" />
-	<!-- ros_arduino_base -->
-	<node pkg="ros_arduino_base" type="ros_arduino_base_node" name="ros_arduino_base_node" output="screen" respawn="false" />
-	<node pkg="rosserial_python" type="serial_node.py" name="arduino_base_controller" output="screen" respawn="true">
-		<param name="~port" value="/dev/ttyACM0" />
-		<param name="~baud" value="115200" />
-	</node> 
+  <!-- ros_arduino_base -->
+  <node pkg="ros_arduino_base" type="ros_arduino_base_node" name="ros_arduino_base_node" output="screen" respawn="false">
+    <rosparam file="$(find ros_arduino_base)/config/default.yaml" command="load"/>
+  </node>
+  <node pkg="rosserial_python" type="serial_node.py" name="arduino_base_controller" output="screen" respawn="true">
+    <param name="~port" value="/dev/ttyACM0" />
+    <param name="~baud" value="115200" />
+  </node> 
 </launch>

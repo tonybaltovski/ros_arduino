@@ -9,3 +9,4 @@ control_rate: [50]
 encoder_rate: [50]
 pwm_range: [255]
 no_cmd_timeout: [1]
+publish_tf: true
