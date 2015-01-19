@@ -61,7 +61,7 @@ class ROSArduinoBase
     dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig> gain_server_;
     // Members
     bool publish_tf_;
-    ros::Time encoder_current_time_, encoder_previous_time_;
+    ros::Time encoder_previous_time_;
     tf::TransformBroadcaster *odom_broadcaster_;
     std::string base_frame_, odom_frame_;
     double pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_;

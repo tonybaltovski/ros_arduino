@@ -30,6 +30,7 @@
  */
 
 #include <ros.h>
+#include <ros/time.h>
 #include <ros_arduino_base/UpdateGains.h>
 #include <ros_arduino_msgs/Encoders.h>
 #include <ros_arduino_msgs/CmdDiffVel.h>
@@ -83,9 +84,9 @@ int control_rate[1];  // Hz
 int encoder_rate[1];  // Hz
 int no_cmd_timeout[1]; // seconds
 
-static uint32_t last_encoders_time;  // miliseconds
-static uint32_t last_cmd_time;  // miliseconds
-static uint32_t last_control_time;  // miliseconds
+uint32_t last_encoders_time;  // miliseconds
+uint32_t last_cmd_time;  // miliseconds
+uint32_t last_control_time;  // miliseconds
 
 // ROS node
 ros::NodeHandle_<ArduinoHardware, 10, 10, 1024, 1024> nh;
@@ -103,6 +104,7 @@ ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::Upd
 
 // ROS publishers msgs
 ros_arduino_msgs::Encoders encoders_msg;
+char frame_id[] = "base_link";
 // ROS publishers
 ros::Publisher pub_encoders("encoders", &encoders_msg);
 
@@ -190,6 +192,8 @@ void loop()
   { 
     encoders_msg.left = left_encoder.read();
     encoders_msg.right = right_encoder.read();
+    encoders_msg.header.frame_id = frame_id;
+    encoders_msg.header.stamp = nh.now();
     pub_encoders.publish(&encoders_msg);
     last_encoders_time = millis();
   }

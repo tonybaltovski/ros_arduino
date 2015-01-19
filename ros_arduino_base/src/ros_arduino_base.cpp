@@ -47,12 +47,11 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
 {
   cmd_diff_vel_pub_ = nh_.advertise<ros_arduino_msgs::CmdDiffVel>("cmd_diff_vel", 5);
   odom_pub_ = nh_.advertise<nav_msgs::Odometry>("odom", 5);
-  encoders_sub_ = nh_.subscribe("encoders", 5, &ROSArduinoBase::encodersCallback, this,
-                                    ros::TransportHints().unreliable().reliable().tcpNoDelay());
+  encoders_sub_ = nh_.subscribe("encoders", 5, &ROSArduinoBase::encodersCallback, this);
   cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, &ROSArduinoBase::cmdVelCallback, this);
   update_gains_client_ = nh.serviceClient<ros_arduino_base::UpdateGains>("update_gains");
-  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType f = 
-                                   boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
+  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType 
+    f = boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
   gain_server_.setCallback(f);
 
   // ROS driver params
@@ -123,12 +122,11 @@ void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &conf
 
 void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg)
 {
-  encoder_current_time_ = ros::Time::now();
   nav_msgs::Odometry odom;
   left_counts_ = encoders_msg->left;
   right_counts_ = encoders_msg->right;
 
-  double dt = (encoder_current_time_ - encoder_previous_time_).toSec();  // [s]
+  double dt = encoders_msg->header.stamp.toSec() - encoder_previous_time_.toSec();  // [s]
   double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;  // [m/s]
   double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;  // [m/s]
   double delta_s = meters_per_counts_ * (((right_counts_ - old_right_counts_)
@@ -146,7 +144,7 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   {
     odom_broadcaster_ = new tf::TransformBroadcaster();
     geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = encoder_current_time_;
+    odom_trans.header.stamp = encoders_msg->header.stamp;
     odom_trans.header.frame_id = odom_frame_;
     odom_trans.child_frame_id = base_frame_;
     odom_trans.transform.translation.x = x_;
@@ -156,8 +154,7 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
     odom_broadcaster_->sendTransform(odom_trans);
   }
 
-
-  odom.header.stamp = encoder_current_time_;
+  odom.header.stamp = encoders_msg->header.stamp;
   odom.header.frame_id = odom_frame_;
   odom.child_frame_id = base_frame_;
   odom.pose.pose.position.x = x_;
@@ -175,7 +172,7 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   odom.twist.covariance = twist_covar_;
   odom_pub_.publish(odom);
   // Keep track of previous variables.
-  encoder_previous_time_ = encoder_current_time_;
+  encoder_previous_time_ = encoders_msg->header.stamp;
   old_right_counts_ = right_counts_;
   old_left_counts_ = left_counts_;
 }
