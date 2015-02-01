@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Tony Baltovski 
+ Copyright (c) 2013-2015, Tony Baltovski 
  All rights reserved. 
  
  Redistribution and use in source and binary forms, with or without 
@@ -35,12 +35,37 @@
 #include <ros_arduino_msgs/Encoders.h>
 #include <ros_arduino_msgs/CmdDiffVel.h>
 
+/********************************************************************************************
+/                                                     USER CONFIG                                                              *
+/********************************************************************************************/
+
+// Select your baud rate here
+#define BAUD 115200
+
+// Select your motor driver here
+#define PololuMC33926
+//#define DFRobotL298PShield
+
+// Define your encoder pins here.
+// Try to use pins that have interrupts
+// Left side encoders pins
+#define LEFT_ENCODER_A 14  // Interrupt on Teensy 3.0
+#define LEFT_ENCODER_B 15  // Interrupt on Teensy 3.0
+// Right side encoders pins
+#define RIGHT_ENCODER_A 6  // Interrupt on Teensy 3.0
+#define RIGHT_ENCODER_B 7  // Interrupt on Teensy 3.0
+
+/********************************************************************************************
+/                                                 END OF USER CONFIG                                                    *
+/********************************************************************************************/
+
 #define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 
-#include <PololuMC33926.h>
+#if defined(PololuMC33926)
+  #include <PololuMC33926.h>
+#endif
 
-#include "user_config.h"
 #include "motor_driver_config.h"
 
 typedef struct {
@@ -112,7 +137,7 @@ ros::Publisher pub_encoders("encoders", &encoders_msg);
 void setup() 
 { 
   // Set the node handle
-  nh.getHardware()->setBaud(115200);
+  nh.getHardware()->setBaud(BAUD);
   nh.initNode();
 
   // Pub/Sub
