@@ -2,8 +2,13 @@
 #define _IMU_CONFIGURATION_H_
 
 #include <Arduino.h>
+
 #include "imu_wire.h"
+
 #define GRAVITY -9.80665 // m/s/s
+
+// Set the baud rate
+#define BAUD 115200
 
 // IMU Configuration
 // Select your IMU board from the list below.

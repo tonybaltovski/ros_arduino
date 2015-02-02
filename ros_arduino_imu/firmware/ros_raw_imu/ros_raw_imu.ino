@@ -30,26 +30,29 @@
  */
 
 #include <Wire.h>
+
 #include <ros.h>
 #include <ros/time.h>
 #include <ros_arduino_msgs/RawImu.h>
 #include <geometry_msgs/Vector3.h>
+
 #include "imu_configuration.h"
 
 ros::NodeHandle nh;
 
-static uint32_t last_time = 0;
+uint32_t last_time = 0;
 uint32_t update_rate = 200; //Hz
+
 bool is_first = true;
 bool is_accelerometer_calibrated = false;
 bool is_gyroscope_calibrated = false;
 
 ros_arduino_msgs::RawImu raw_imu_msg;
-ros::Publisher raw_imu_pub("/raw_imu", &raw_imu_msg);
+ros::Publisher raw_imu_pub("raw_imu", &raw_imu_msg);
 
 void setup()
 {
-  nh.getHardware()->setBaud(115200);
+  nh.getHardware()->setBaud(BAUD);
   nh.initNode();
   nh.advertise(raw_imu_pub);
   // Wait for ROSserial to connect
@@ -71,6 +74,7 @@ void loop()
     {
       nh.logwarn("Calibrating IMU!");
       nh.logwarn("Sync may be lost.");
+      
       raw_imu_msg.accelerometer = check_accelerometer();
       raw_imu_msg.gyroscope = check_gyroscope();
       raw_imu_msg.magnetometer = check_magnetometer();
@@ -87,28 +91,31 @@ void loop()
       else
       {
         raw_imu_msg.header.stamp = nh.now();
-        raw_imu_msg.header.frame_id = "/imu_link";
+        raw_imu_msg.header.frame_id = "imu_link";
         if (raw_imu_msg.accelerometer)
         {
           raw_imu_msg.raw_linear_acceleration = measure_acceleration();
         }
         else
+        {
           nh.logerror("Accelerometer NOT FOUND!");
-
+        }
+        
         if (raw_imu_msg.gyroscope)
         {
           raw_imu_msg.raw_angular_velocity = measure_gyroscope();
         }
         else
+        {
           nh.logerror("Gyroscope NOT FOUND!");
-
+        }
+        
         if (raw_imu_msg.magnetometer)
         {
           raw_imu_msg.raw_magnetic_field = measure_magnetometer();
         }
         else
         {
-          raw_imu_msg.raw_magnetic_field = measure_magnetometer();
           nh.logerror("Magnetometer NOT FOUND!");
         }
 
