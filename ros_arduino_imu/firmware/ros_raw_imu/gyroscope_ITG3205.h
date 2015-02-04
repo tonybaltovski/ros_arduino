@@ -33,8 +33,7 @@ bool remove_gyroscope_bias() {
 
   for (int samples = 0; samples < gyroscope_total_samples; samples++)
   {
-    int reads = 0;
-    byte buffer[6];
+    reads = 0;
     send_value(ITG3205_GYRO_ADDRESS,0x1D);
     Wire.requestFrom(ITG3205_GYRO_ADDRESS,6);
     while(Wire.available())
@@ -56,14 +55,11 @@ bool remove_gyroscope_bias() {
   gyroscope_samples[GYRO_Z_AXIS] = 0;
 
   return true;
-
 }
 
 geometry_msgs::Vector3 measure_gyroscope()
 {
-  geometry_msgs::Vector3 raw_rotation;
-  int reads = 0;
-  byte buffer[6];
+  reads = 0;;
   send_value(ITG3205_GYRO_ADDRESS,0x1D);
   Wire.requestFrom(ITG3205_GYRO_ADDRESS,6);
   while(Wire.available())

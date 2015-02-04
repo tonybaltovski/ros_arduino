@@ -73,7 +73,6 @@ void loop()
     if (is_first)
     {
       nh.logwarn("Calibrating IMU!");
-      nh.logwarn("Please wait");
       
       raw_imu_msg.accelerometer = check_accelerometer();
       raw_imu_msg.gyroscope = check_gyroscope();

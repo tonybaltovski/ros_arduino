@@ -32,7 +32,7 @@ bool check_accelerometer()
 }
 bool remove_acceleration_bias()
 {
-  for (int samples = 0; samples < 1000; samples++)
+  for (int samples = 0; samples < acceleration_total_samples; samples++)
   {
     int reads = 0;
     byte buffer[6];
@@ -62,7 +62,6 @@ bool remove_acceleration_bias()
 
 geometry_msgs::Vector3 measure_acceleration()
 {
-  geometry_msgs::Vector3 raw_acceleration;
   int reads = 0;
   byte buffer[6];
   send_value(ADXL345_ACCELEROMETER_ADDRESS, ADXL345_DATAX0);

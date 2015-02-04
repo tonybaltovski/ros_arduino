@@ -7,7 +7,7 @@
 #include <geometry_msgs/Vector3.h>
 
 #if defined(HMC5883L)
-#include "magnetometer_HMC5883L.h"
+  #include "magnetometer_HMC5883L.h"
 #endif
 
 bool check_magnetometer();
