@@ -5,9 +5,10 @@ This a repo to interface various IMU boards connected to Adruino and Arduino-lik
 ## Current IMUs ##
 - Sparkfun SEN-10724
 - Generic GY-85
+- Generic GY-80
 
 ## Inprogress ##
-- Generic GY-80
+- Generic GY-80 (baro)
 
 ## Individial sensors ##
 ### Accelerometers ###
@@ -18,7 +19,7 @@ This a repo to interface various IMU boards connected to Adruino and Arduino-lik
 ### Gyroscopes ###
 
 - ITG3200(ITG3205)
-- L3G4200D [inprogress]
+- L3G4200D
 
 
 ### Magnetometers  ###
