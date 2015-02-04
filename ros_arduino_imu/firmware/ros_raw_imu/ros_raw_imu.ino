@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Tony Baltovski 
+ Copyright (c) 2013-2015, Tony Baltovski 
  All rights reserved. 
  
  Redistribution and use in source and binary forms, with or without 
@@ -62,7 +62,7 @@ void setup()
   }
   nh.loginfo("ROS Arduino IMU started.");
   Wire.begin();                  
-  delay(15);
+  delay(5);
 }
 
 
@@ -71,18 +71,33 @@ void loop()
   if (nh.connected())
   {
     if (is_first)
-    {
-      nh.logwarn("Calibrating IMU!");
-      
+    { 
       raw_imu_msg.accelerometer = check_accelerometer();
       raw_imu_msg.gyroscope = check_gyroscope();
       raw_imu_msg.magnetometer = check_magnetometer();
+      
+      if (raw_imu_msg.accelerometer)
+      {
+        nh.logerror("Accelerometer NOT FOUND!");
+      }
+      
+      if (!raw_imu_msg.gyroscope)
+      {
+        nh.logerror("Gyroscope NOT FOUND!");
+      }
+      
+      if (!raw_imu_msg.magnetometer)
+      {
+        nh.logerror("Magnetometer NOT FOUND!");
+      }
+      
       is_first = false;
     }
     else if (millis() - last_time >= 1000/update_rate)
     {
       if(!is_accelerometer_calibrated && !is_gyroscope_calibrated)
       {
+        nh.logwarn("Calibrating IMU! Hold still.");
         is_accelerometer_calibrated = remove_acceleration_bias();
         is_gyroscope_calibrated = remove_gyroscope_bias();
         nh.logwarn("IMU Calibration Complete");
@@ -95,27 +110,15 @@ void loop()
         {
           raw_imu_msg.raw_linear_acceleration = measure_acceleration();
         }
-        else
-        {
-          nh.logerror("Accelerometer NOT FOUND!");
-        }
         
         if (raw_imu_msg.gyroscope)
         {
           raw_imu_msg.raw_angular_velocity = measure_gyroscope();
         }
-        else
-        {
-          nh.logerror("Gyroscope NOT FOUND!");
-        }
         
         if (raw_imu_msg.magnetometer)
         {
           raw_imu_msg.raw_magnetic_field = measure_magnetometer();
-        }
-        else
-        {
-          nh.logerror("Magnetometer NOT FOUND!");
         }
 
         raw_imu_pub.publish(&raw_imu_msg);
