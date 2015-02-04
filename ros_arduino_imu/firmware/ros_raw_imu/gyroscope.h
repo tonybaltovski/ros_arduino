@@ -8,10 +8,10 @@
 
 float gyroscope_offset[3] = {0.0,0.0,0.0};
 float gyroscope_samples[3] = {0.0,0.0,0.0};
-int gyroscope_total_samples = 500;
+uint16_t gyroscope_total_samples = 500;
 
-int reads = 0;
-byte buffer[6];
+uint8_t gyro_reads = 0;
+byte gyro_buffer[6];
 
 bool check_gyroscope();
 bool remove_gyroscope_bias();

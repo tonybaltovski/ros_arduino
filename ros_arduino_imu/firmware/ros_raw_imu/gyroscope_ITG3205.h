@@ -31,19 +31,19 @@ bool check_gyroscope()
 
 bool remove_gyroscope_bias() {
 
-  for (int samples = 0; samples < gyroscope_total_samples; samples++)
+  for (uint16_t samples = 0; samples < gyroscope_total_samples; samples++)
   {
-    reads = 0;
+    gyro_reads = 0;
     send_value(ITG3205_GYRO_ADDRESS,0x1D);
     Wire.requestFrom(ITG3205_GYRO_ADDRESS,6);
     while(Wire.available())
     {
-      buffer[reads] = Wire.read(); 
+      gyro_buffer[reads] = Wire.read(); 
       reads++;
     }
-    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_X_AXIS] <<8) | buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE;
-    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Y_AXIS] <<8) | buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE;
-    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Z_AXIS] <<8) | buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE;
+    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_X_AXIS] <<8) | gyro_buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE;
+    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Y_AXIS] <<8) | gyro_buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE;
+    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Z_AXIS] <<8) | gyro_buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE;
     nh.spinOnce();
     delay(10);
   }
@@ -67,9 +67,9 @@ geometry_msgs::Vector3 measure_gyroscope()
     buffer[reads] = Wire.read();
     reads++;
   }
-  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_X_AXIS] <<8) | buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_X_AXIS];  //rad/s
-  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(buffer[2*GYRO_Y_AXIS] <<8) | buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Y_AXIS];
-  raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_Z_AXIS] <<8) | buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Z_AXIS];
+  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(gyro_buffer[2*GYRO_X_AXIS] <<8) | gyro_buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_X_AXIS];  //rad/s
+  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(gyro_buffer[2*GYRO_Y_AXIS] <<8) | gyro_buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Y_AXIS];
+  raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(gyro_buffer[2*GYRO_Z_AXIS] <<8) | gyro_buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Z_AXIS];
   return raw_rotation;
 }
 #endif  // _GYROSCOPE_ITFG3205_H_

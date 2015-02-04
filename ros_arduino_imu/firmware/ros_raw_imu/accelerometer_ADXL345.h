@@ -32,21 +32,20 @@ bool check_accelerometer()
 }
 bool remove_acceleration_bias()
 {
-  for (int samples = 0; samples < acceleration_total_samples; samples++)
+  for (uint16_t samples = 0; samples < acceleration_total_samples; samples++)
   {
-    int reads = 0;
-    byte buffer[6];
+    acc_reads = 0;
     send_value(ADXL345_ACCELEROMETER_ADDRESS, ADXL345_DATAX0);
     Wire.requestFrom(ADXL345_ACCELEROMETER_ADDRESS, 6);
     while(Wire.available())
     {
-      buffer[reads] = Wire.read();
-      reads++;
+      acc_buffer[acc_reads] = Wire.read();
+      acc_reads++;
     }
 
-    acceleration_samples[ACC_X_AXIS] +=((float)((int16_t)buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)buffer[2*ACC_X_AXIS])) / ADXL345_SCALE;
-    acceleration_samples[ACC_Y_AXIS] +=((float)((int16_t)buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Y_AXIS])) / ADXL345_SCALE;
-    acceleration_samples[ACC_Z_AXIS] +=((float)((int16_t)buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Z_AXIS])) / ADXL345_SCALE;
+    acceleration_samples[ACC_X_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS])) / ADXL345_SCALE;
+    acceleration_samples[ACC_Y_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS])) / ADXL345_SCALE;
+    acceleration_samples[ACC_Z_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS])) / ADXL345_SCALE;
     nh.spinOnce();
     delay(10);
   }
@@ -62,19 +61,18 @@ bool remove_acceleration_bias()
 
 geometry_msgs::Vector3 measure_acceleration()
 {
-  int reads = 0;
-  byte buffer[6];
+  acc_reads = 0;
   send_value(ADXL345_ACCELEROMETER_ADDRESS, ADXL345_DATAX0);
   Wire.requestFrom(ADXL345_ACCELEROMETER_ADDRESS, 6);
   while(Wire.available())
   {
-    buffer[reads] = Wire.read();
-    reads++;
+    acc_buffer[acc_reads] = Wire.read();
+    acc_reads++;
   }
   
-  raw_acceleration.x =  ((float)ACC_X_INVERT*((int16_t)buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)buffer[2*ACC_X_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_X_AXIS]);
-  raw_acceleration.y =  ((float)ACC_Y_INVERT*((int16_t)buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Y_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Y_AXIS]);
-  raw_acceleration.z =  ((float)ACC_Z_INVERT*((int16_t)buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Z_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Z_AXIS]);
+  raw_acceleration.x =  ((float)ACC_X_INVERT*((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_X_AXIS]);
+  raw_acceleration.y =  ((float)ACC_Y_INVERT*((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Y_AXIS]);
+  raw_acceleration.z =  ((float)ACC_Z_INVERT*((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Z_AXIS]);
   return raw_acceleration;
 }
 

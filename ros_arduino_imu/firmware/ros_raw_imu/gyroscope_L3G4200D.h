@@ -31,19 +31,19 @@ bool check_gyroscope()
 
 bool remove_gyroscope_bias() {
 
-  for (int samples = 0; samples < gyroscope_total_samples; samples++)
+  for (uint16_t samples = 0; samples < gyroscope_total_samples; samples++)
   {
-    reads = 0;
+    gyro_reads = 0;
     send_value(L3G4200D_GYRO_ADDRESS,0x80 | 0x28);
     Wire.requestFrom(L3G4200D_GYRO_ADDRESS,6);
     while(Wire.available())
     {
-      buffer[reads] = Wire.read(); 
-      reads++;
+      gyro_buffer[gyro_reads] = Wire.read(); 
+      gyro_reads++;
     }
-    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_X_AXIS+1] <<8) | buffer[2*GYRO_X_AXIS])) / L3G4200D_SCALE;
-    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Y_AXIS+1] <<8) | buffer[2*GYRO_Y_AXIS])) / L3G4200D_SCALE;
-    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Z_AXIS+1] <<8) | buffer[2*GYRO_Z_AXIS])) / L3G4200D_SCALE;
+    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_X_AXIS+1] <<8) | gyro_buffer[2*GYRO_X_AXIS])) / L3G4200D_SCALE;
+    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Y_AXIS+1] <<8) | gyro_buffer[2*GYRO_Y_AXIS])) / L3G4200D_SCALE;
+    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Z_AXIS+1] <<8) | gyro_buffer[2*GYRO_Z_AXIS])) / L3G4200D_SCALE;
     nh.spinOnce();
     delay(10);
   }
@@ -59,17 +59,17 @@ bool remove_gyroscope_bias() {
 
 geometry_msgs::Vector3 measure_gyroscope()
 {
-  reads = 0;
+  gyro_reads = 0;
   send_value(L3G4200D_GYRO_ADDRESS,0x80 | 0x28);
   Wire.requestFrom(L3G4200D_GYRO_ADDRESS,6);
   while(Wire.available())
   {
-    buffer[reads] = Wire.read();
-    reads++;
+    gyro_buffer[gyro_reads] = Wire.read();
+    gyro_reads++;
   }
-  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_X_AXIS+1] <<8) | buffer[2*GYRO_X_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_X_AXIS];  //rad/s
-  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(buffer[2*GYRO_Y_AXIS+1] <<8) | buffer[2*GYRO_Y_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_Y_AXIS];
-  raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_Z_AXIS+1] <<8) | buffer[2*GYRO_Z_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_Z_AXIS];
+  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(gyro_buffer[2*GYRO_X_AXIS+1] <<8) | gyro_buffer[2*GYRO_X_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_X_AXIS];  //rad/s
+  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(gyro_buffer[2*GYRO_Y_AXIS+1] <<8) | gyro_buffer[2*GYRO_Y_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_Y_AXIS];
+  raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(gyro_buffer[2*GYRO_Z_AXIS+1] <<8) | gyro_buffer[2*GYRO_Z_AXIS])) / L3G4200D_SCALE + gyroscope_offset[GYRO_Z_AXIS];
   return raw_rotation;
 }
 

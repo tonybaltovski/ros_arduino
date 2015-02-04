@@ -41,7 +41,7 @@ ros::NodeHandle nh;
 #include "imu_configuration.h"
 
 uint32_t last_time = 0;
-uint32_t update_rate = 50; //Hz
+uint8_t update_rate = 50; //Hz
 
 bool is_first = true;
 bool is_accelerometer_calibrated = false;

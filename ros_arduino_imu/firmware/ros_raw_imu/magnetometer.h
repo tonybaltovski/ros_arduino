@@ -6,13 +6,16 @@
 #include <ros/time.h>
 #include <geometry_msgs/Vector3.h>
 
-#if defined(HMC5883L)
-  #include "magnetometer_HMC5883L.h"
-#endif
+uint8_t mag_reads = 0;
+byte mag_buffer[6];
+geometry_msgs::Vector3 raw_magnetic_field;
 
 bool check_magnetometer();
 geometry_msgs::Vector3 measure_magnetometer();
 
+#if defined(HMC5883L)
+  #include "magnetometer_HMC5883L.h"
+#endif
 
 #endif  // _MAGNETOMETER_H_
 

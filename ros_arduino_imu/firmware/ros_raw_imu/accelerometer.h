@@ -8,7 +8,10 @@
 
 float acceleration_bias[3]= {0.0,0.0,0.0};
 float acceleration_samples[3] = {0.0,0.0,0.0};
-int acceleration_total_samples = 500;
+uint16_t acceleration_total_samples = 500;
+
+uint8_t acc_reads = 0;
+byte acc_buffer[6];
 
 bool remove_acceleration_bias();
 bool check_accelerometer();
