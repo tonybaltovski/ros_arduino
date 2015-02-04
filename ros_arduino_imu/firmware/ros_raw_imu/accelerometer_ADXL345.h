@@ -32,7 +32,7 @@ bool check_accelerometer()
 }
 bool remove_acceleration_bias()
 {
-  for (int samples = 0; samples < 500; samples++)
+  for (int samples = 0; samples < 1000; samples++)
   {
     int reads = 0;
     byte buffer[6];
@@ -47,6 +47,7 @@ bool remove_acceleration_bias()
     acceleration_samples[ACC_X_AXIS] +=((float)((int16_t)buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)buffer[2*ACC_X_AXIS])) / ADXL345_SCALE;
     acceleration_samples[ACC_Y_AXIS] +=((float)((int16_t)buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Y_AXIS])) / ADXL345_SCALE;
     acceleration_samples[ACC_Z_AXIS] +=((float)((int16_t)buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)buffer[2*ACC_Z_AXIS])) / ADXL345_SCALE;
+    nh.spinOnce();
     delay(10);
   }
   acceleration_bias[ACC_X_AXIS] = -(acceleration_samples[ACC_X_AXIS]/500);

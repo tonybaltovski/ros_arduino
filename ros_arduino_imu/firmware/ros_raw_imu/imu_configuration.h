@@ -32,7 +32,7 @@
   #define GYRO_Y_AXIS 0
   #define GYRO_Z_AXIS 2
   #define GYRO_X_INVERT 1
-  #define GYRO_Y_INVERT -1
+  #define GYRO_Y_INVERT 1
   #define GYRO_Z_INVERT 1
   // Magnetometer
   #define HMC5883L

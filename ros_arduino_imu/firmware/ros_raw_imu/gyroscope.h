@@ -10,7 +10,7 @@ float gyroscope_offset[3] = {
   0.0,0.0,0.0};
 float gyroscope_samples[3] = {
   0.0,0.0,0.0};
-int gyroscope_total_samples = 500;
+int gyroscope_total_samples = 100;
 bool check_gyroscope();
 bool remove_gyroscope_bias();
 geometry_msgs::Vector3 measure_gyroscope();

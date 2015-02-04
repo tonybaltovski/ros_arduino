@@ -42,10 +42,11 @@ bool remove_gyroscope_bias() {
       buffer[reads] = Wire.read(); 
       reads++;
     }
-    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(buffer[0] <<8) | buffer[1])) * ITG3205_SCALE;
-    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(buffer[2] <<8) | buffer[3])) * ITG3205_SCALE;
-    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(buffer[4] <<8) | buffer[5])) * ITG3205_SCALE;
-    delay(50);
+    gyroscope_samples[GYRO_X_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_X_AXIS] <<8) | buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE;
+    gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Y_AXIS] <<8) | buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE;
+    gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(buffer[2*GYRO_Z_AXIS] <<8) | buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE;
+    nh.spinOnce();
+    delay(10);
   }
   gyroscope_offset[GYRO_X_AXIS] = -(gyroscope_samples[GYRO_X_AXIS]/gyroscope_total_samples);
   gyroscope_offset[GYRO_Y_AXIS] = -(gyroscope_samples[GYRO_Y_AXIS]/gyroscope_total_samples);
@@ -70,8 +71,8 @@ geometry_msgs::Vector3 measure_gyroscope()
     buffer[reads] = Wire.read();
     reads++;
   }
-  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_X_AXIS] <<8) | buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Y_AXIS]; //rad/s
-  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(buffer[2*GYRO_Y_AXIS] <<8) | buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_X_AXIS];
+  raw_rotation.x = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_X_AXIS] <<8) | buffer[2*GYRO_X_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_X_AXIS];  //rad/s
+  raw_rotation.y = (float)(GYRO_Y_INVERT*((int16_t)(buffer[2*GYRO_Y_AXIS] <<8) | buffer[2*GYRO_Y_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Y_AXIS];
   raw_rotation.z = (float)(GYRO_X_INVERT*((int16_t)(buffer[2*GYRO_Z_AXIS] <<8) | buffer[2*GYRO_Z_AXIS+1])) * ITG3205_SCALE + gyroscope_offset[GYRO_Z_AXIS];
   return raw_rotation;
 }

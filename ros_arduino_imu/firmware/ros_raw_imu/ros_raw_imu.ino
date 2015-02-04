@@ -36,12 +36,12 @@
 #include <ros_arduino_msgs/RawImu.h>
 #include <geometry_msgs/Vector3.h>
 
-#include "imu_configuration.h"
-
 ros::NodeHandle nh;
 
+#include "imu_configuration.h"
+
 uint32_t last_time = 0;
-uint32_t update_rate = 200; //Hz
+uint32_t update_rate = 50; //Hz
 
 bool is_first = true;
 bool is_accelerometer_calibrated = false;
@@ -73,7 +73,7 @@ void loop()
     if (is_first)
     {
       nh.logwarn("Calibrating IMU!");
-      nh.logwarn("Sync may be lost.");
+      nh.logwarn("Please wait");
       
       raw_imu_msg.accelerometer = check_accelerometer();
       raw_imu_msg.gyroscope = check_gyroscope();
