@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2013, Tony Baltovski
+Copyright (c) 2013-2015, Tony Baltovski
 All rights reserved.
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -48,6 +48,7 @@ class RawImuBridge
     double mag_x_min_, mag_x_max_;
     double mag_y_min_, mag_y_max_;
     double mag_z_min_, mag_z_max_;
+    static const double MILIGAUSS_TO_TESLA_SCALE = 0.0000001; // From Milligauss [mG] to Tesla [T]
     // ROS pub/sub
     ros::Publisher imu_pub_;
     ros::Publisher mag_pub_;
@@ -61,4 +62,3 @@ class RawImuBridge
 };
 
 #endif  // _RAW_IMU_BRIDGE_H_
-

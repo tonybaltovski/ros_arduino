@@ -14,8 +14,8 @@
 // Select your IMU board from the list below.
 // If not avaliable, define a custom one but feel free to added it.
 //#define SEN10724
-//#define GY85
-#define GY80
+#define GY85
+//#define GY80
 //#define OTHER
 
 #if defined(SEN10724)
@@ -62,10 +62,10 @@
   #define GYRO_Z_INVERT 1
   // Magnetometer
   #define HMC5883L
-  #define MAG_X_AXIS 0
-  #define MAG_Y_AXIS 2
+  #define MAG_X_AXIS 2
+  #define MAG_Y_AXIS 0
   #define MAG_Z_AXIS 1
-  #define MAG_X_INVERT 1
+  #define MAG_X_INVERT -1
   #define MAG_Y_INVERT 1
   #define MAG_Z_INVERT 1
 #elif defined(GY80)
@@ -87,10 +87,10 @@
   #define GYRO_Z_INVERT 1
   // Magnetometer
   #define HMC5883L
-  #define MAG_X_AXIS 0
-  #define MAG_Y_AXIS 2
+  #define MAG_X_AXIS 2
+  #define MAG_Y_AXIS 0
   #define MAG_Z_AXIS 1
-  #define MAG_X_INVERT 1
+  #define MAG_X_INVERT -1
   #define MAG_Y_INVERT 1
   #define MAG_Z_INVERT 1
 #elif defined(OTHER)

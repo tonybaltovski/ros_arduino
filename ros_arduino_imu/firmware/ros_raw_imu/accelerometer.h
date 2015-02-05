@@ -8,7 +8,7 @@
 
 float acceleration_bias[3]= {0.0,0.0,0.0};
 float acceleration_samples[3] = {0.0,0.0,0.0};
-uint16_t acceleration_total_samples = 500;
+uint16_t acceleration_total_samples = 1000;
 
 uint8_t acc_reads = 0;
 byte acc_buffer[6];

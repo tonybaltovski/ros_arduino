@@ -44,10 +44,10 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
 
   // Fill covar matrices
   // Magnetometer calibration values.
-  pnh.param<double>("mag/x/min", mag_x_min_, -574);
-  pnh.param<double>("mag/x/max", mag_x_max_,  638);
-  pnh.param<double>("mag/y/min", mag_y_min_, -520);
-  pnh.param<double>("mag/y/max", mag_y_max_,  846);
+  pnh.param<double>("mag/x/min", mag_x_min_, -520);
+  pnh.param<double>("mag/x/max", mag_x_max_,  846);
+  pnh.param<double>("mag/y/min", mag_y_min_, -574);
+  pnh.param<double>("mag/y/max", mag_y_max_,  638);
   pnh.param<double>("mag/z/min", mag_z_min_, -626);
   pnh.param<double>("mag/z/max", mag_z_max_,  552);
 
@@ -63,15 +63,15 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
 {
   if(!raw_msg->accelerometer && use_accelerometer_)
   {
-    ROS_ERROR("Accelerometer not found!");
+    ROS_ERROR_ONCE("Accelerometer not found!");
   }
   if(!raw_msg->gyroscope && use_gyroscope_)
   {
-    ROS_ERROR("Gyroscope not found!");
+    ROS_ERROR_ONCE("Gyroscope not found!");
   }
   if(!raw_msg->magnetometer && use_magnetometer_)
   {
-    ROS_ERROR("Magnetometer not found!");
+    ROS_ERROR_ONCE("Magnetometer not found!");
   }
 
     if(use_accelerometer_ || use_gyroscope_)
@@ -101,9 +101,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         sensor_msgs::MagneticField mag_msg;
         mag_msg.header = raw_msg->header;
         mag_msg.header.frame_id = frame_id_;
-        mag_msg.magnetic_field.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_);
-        mag_msg.magnetic_field.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_);
-        mag_msg.magnetic_field.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_);
+        mag_msg.magnetic_field.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.magnetic_field.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.magnetic_field.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
         mag_msg.magnetic_field_covariance = magnetic_field_covar_;
         mag_pub_.publish(mag_msg);
       }
@@ -112,9 +112,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         geometry_msgs::Vector3Stamped mag_msg;
         mag_msg.header = raw_msg->header;
         mag_msg.header.frame_id = frame_id_;
-        mag_msg.vector.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_);
-        mag_msg.vector.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_);
-        mag_msg.vector.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_);
+        mag_msg.vector.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.vector.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.vector.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
         mag_pub_.publish(mag_msg);
       }
     }

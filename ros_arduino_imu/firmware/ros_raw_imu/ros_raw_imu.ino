@@ -41,7 +41,7 @@ ros::NodeHandle nh;
 #include "imu_configuration.h"
 
 uint32_t last_time = 0;
-uint8_t update_rate = 50; //Hz
+uint8_t update_rate = 25; //Hz
 
 bool is_first = true;
 bool is_accelerometer_calibrated = false;
@@ -76,7 +76,7 @@ void loop()
       raw_imu_msg.gyroscope = check_gyroscope();
       raw_imu_msg.magnetometer = check_magnetometer();
       
-      if (raw_imu_msg.accelerometer)
+      if (!raw_imu_msg.accelerometer)
       {
         nh.logerror("Accelerometer NOT FOUND!");
       }

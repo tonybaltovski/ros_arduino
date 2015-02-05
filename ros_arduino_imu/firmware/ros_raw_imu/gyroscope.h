@@ -8,7 +8,7 @@
 
 float gyroscope_offset[3] = {0.0,0.0,0.0};
 float gyroscope_samples[3] = {0.0,0.0,0.0};
-uint16_t gyroscope_total_samples = 500;
+uint16_t gyroscope_total_samples = 1000;
 
 uint8_t gyro_reads = 0;
 byte gyro_buffer[6];

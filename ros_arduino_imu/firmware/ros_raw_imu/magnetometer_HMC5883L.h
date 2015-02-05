@@ -17,11 +17,8 @@ bool check_magnetometer()
   write_to_register(HMC5883L_MAG_ADDRESS,HMC5883L_MAG_REG_A,0x18); //75Hz output
   delay(5);
   write_to_register(HMC5883L_MAG_ADDRESS,HMC5883L_MAG_MODE,0x01); //Single-Measurement Mode
-  delay(10);
-  return true;
-  //}
-  //else
-  //return false;
+  delay(5);
+  return true;;
 }
 
 geometry_msgs::Vector3 measure_magnetometer()
@@ -35,8 +32,8 @@ geometry_msgs::Vector3 measure_magnetometer()
     mag_reads++;
   }
   raw_magnetic_field.x =  (float)(MAG_X_INVERT * ((int16_t)(mag_buffer[2*MAG_X_AXIS] << 8) | (mag_buffer[2*MAG_X_AXIS+1]))) * HMC5883L_MAG_SCALE; 
-  raw_magnetic_field.y =  (float)(MAG_X_INVERT * ((int16_t)(mag_buffer[2*MAG_Y_AXIS] << 8) | (mag_buffer[2*MAG_Y_AXIS+1]))) * HMC5883L_MAG_SCALE;
-  raw_magnetic_field.z =  (float)(MAG_X_INVERT * ((int16_t)(mag_buffer[2*MAG_Z_AXIS] << 8) | (mag_buffer[2*MAG_Z_AXIS+1]))) * HMC5883L_MAG_SCALE;
+  raw_magnetic_field.y =  (float)(MAG_Y_INVERT * ((int16_t)(mag_buffer[2*MAG_Y_AXIS] << 8) | (mag_buffer[2*MAG_Y_AXIS+1]))) * HMC5883L_MAG_SCALE;
+  raw_magnetic_field.z =  (float)(MAG_Z_INVERT * ((int16_t)(mag_buffer[2*MAG_Z_AXIS] << 8) | (mag_buffer[2*MAG_Z_AXIS+1]))) * HMC5883L_MAG_SCALE;
   write_to_register(HMC5883L_MAG_ADDRESS,HMC5883L_MAG_MODE,0x01);
   return raw_magnetic_field;
 }

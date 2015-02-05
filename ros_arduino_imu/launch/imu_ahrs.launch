@@ -5,7 +5,7 @@
     <param name="~baud" value="115200" />
   </node> 
 
-  <node pkg="ros_arduino_imu" type="raw_imu_bridge" name="raw_imu_bridge" output="screen" respawn="false" />
+  <node pkg="ros_arduino_imu" type="raw_imu_bridge_node" name="raw_imu_bridge" output="screen" respawn="false" />
 
   <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" />
 

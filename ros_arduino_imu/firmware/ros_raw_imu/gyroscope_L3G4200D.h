@@ -45,11 +45,11 @@ bool remove_gyroscope_bias() {
     gyroscope_samples[GYRO_Y_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Y_AXIS+1] <<8) | gyro_buffer[2*GYRO_Y_AXIS])) / L3G4200D_SCALE;
     gyroscope_samples[GYRO_Z_AXIS] +=  (float)(((int16_t)(gyro_buffer[2*GYRO_Z_AXIS+1] <<8) | gyro_buffer[2*GYRO_Z_AXIS])) / L3G4200D_SCALE;
     nh.spinOnce();
-    delay(10);
+    delay(5);
   }
-  gyroscope_offset[GYRO_X_AXIS] = -(gyroscope_samples[GYRO_X_AXIS]/gyroscope_total_samples);
-  gyroscope_offset[GYRO_Y_AXIS] = -(gyroscope_samples[GYRO_Y_AXIS]/gyroscope_total_samples);
-  gyroscope_offset[GYRO_Z_AXIS] = -(gyroscope_samples[GYRO_Z_AXIS]/gyroscope_total_samples);
+  gyroscope_offset[GYRO_X_AXIS] = -(gyroscope_samples[GYRO_X_AXIS] / gyroscope_total_samples);
+  gyroscope_offset[GYRO_Y_AXIS] = -(gyroscope_samples[GYRO_Y_AXIS] / gyroscope_total_samples);
+  gyroscope_offset[GYRO_Z_AXIS] = -(gyroscope_samples[GYRO_Z_AXIS] / gyroscope_total_samples);
   gyroscope_samples[GYRO_X_AXIS] = 0;
   gyroscope_samples[GYRO_Y_AXIS] = 0;
   gyroscope_samples[GYRO_Z_AXIS] = 0;

@@ -47,11 +47,11 @@ bool remove_acceleration_bias()
     acceleration_samples[ACC_Y_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS])) / ADXL345_SCALE;
     acceleration_samples[ACC_Z_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS])) / ADXL345_SCALE;
     nh.spinOnce();
-    delay(10);
+    delay(5);
   }
-  acceleration_bias[ACC_X_AXIS] = -(acceleration_samples[ACC_X_AXIS]/500);
-  acceleration_bias[ACC_Y_AXIS] = -(acceleration_samples[ACC_Y_AXIS]/500);
-  acceleration_bias[ACC_Z_AXIS] = -(acceleration_samples[ACC_Z_AXIS]/500)-GRAVITY;
+  acceleration_bias[ACC_X_AXIS] = -(acceleration_samples[ACC_X_AXIS] / acceleration_total_samples);
+  acceleration_bias[ACC_Y_AXIS] = -(acceleration_samples[ACC_Y_AXIS] / acceleration_total_samples);
+  acceleration_bias[ACC_Z_AXIS] = -(acceleration_samples[ACC_Z_AXIS] / acceleration_total_samples) - GRAVITY;
   acceleration_samples[ACC_X_AXIS] = 0;
   acceleration_samples[ACC_Y_AXIS] = 0;
   acceleration_samples[ACC_Z_AXIS] = 0;
@@ -70,9 +70,9 @@ geometry_msgs::Vector3 measure_acceleration()
     acc_reads++;
   }
   
-  raw_acceleration.x =  ((float)ACC_X_INVERT*((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_X_AXIS]);
-  raw_acceleration.y =  ((float)ACC_Y_INVERT*((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Y_AXIS]);
-  raw_acceleration.z =  ((float)ACC_Z_INVERT*((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS]) /ADXL345_SCALE + acceleration_bias[ACC_Z_AXIS]);
+  raw_acceleration.x =  ((float)ACC_X_INVERT*((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_X_AXIS]);
+  raw_acceleration.y =  ((float)ACC_Y_INVERT*((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_Y_AXIS]);
+  raw_acceleration.z =  ((float)ACC_Z_INVERT*((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_Z_AXIS]);
   return raw_acceleration;
 }
 
