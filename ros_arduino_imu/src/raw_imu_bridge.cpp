@@ -13,11 +13,11 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   pnh.param<bool>("imu/use_gyroscope", use_gyroscope_, use_gyroscope_);
   pnh.param<bool>("imu/use_magnetometer", use_magnetometer_, use_magnetometer_);
   pnh.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
-  pnh.param<std::string>("imu/frame_id", frame_id_, "imu");
+  pnh.param<std::string>("imu/frame_id", frame_id_, "imu_link");
 
-  pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.0);
-  pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.0);
-  pnh.param<double>("imu/linear_acc_stdev", magnetic_field_stdev_, 0.0);
+  pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.001);
+  pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.001);
+  pnh.param<double>("imu/linear_acc_stdev", magnetic_field_stdev_, 0.001);
 
   raw_sub_ = nh_.subscribe("raw_imu", 1, &RawImuBridge::rawCallback, this);
   
