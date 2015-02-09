@@ -17,7 +17,7 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
 
   pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.001);
   pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.001);
-  pnh.param<double>("imu/linear_acc_stdev", magnetic_field_stdev_, 0.001);
+  pnh.param<double>("imu/magnetic_field_stdev", magnetic_field_stdev_, 0.001);
 
   raw_sub_ = nh_.subscribe("raw_imu", 1, &RawImuBridge::rawCallback, this);
   
@@ -92,18 +92,14 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
 
     if(use_magnetometer_)
     {
-      double mx, my, mz;
-      mx = raw_msg->raw_magnetic_field.x;
-      my = raw_msg->raw_magnetic_field.y;
-      mz = raw_msg->raw_magnetic_field.z;
       if(use_mag_msg_)
       {
         sensor_msgs::MagneticField mag_msg;
         mag_msg.header = raw_msg->header;
         mag_msg.header.frame_id = frame_id_;
-        mag_msg.magnetic_field.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.magnetic_field.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.magnetic_field.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
         mag_msg.magnetic_field_covariance = magnetic_field_covar_;
         mag_pub_.publish(mag_msg);
       }
@@ -112,9 +108,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         geometry_msgs::Vector3Stamped mag_msg;
         mag_msg.header = raw_msg->header;
         mag_msg.header.frame_id = frame_id_;
-        mag_msg.vector.x = (double)(mx - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.vector.y = (double)(my - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.vector.z = (double)(mz - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.vector.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.vector.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg.vector.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
         mag_pub_.publish(mag_msg);
       }
     }
