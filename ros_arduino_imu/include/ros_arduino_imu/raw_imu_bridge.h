@@ -37,22 +37,32 @@ class RawImuBridge
 {
   private:
     ros::NodeHandle nh_, pnh_;
+    
     bool use_accelerometer_, use_gyroscope_, use_magnetometer_;
     bool use_mag_msg_;
-    std::string frame_id_;
+
+    static const double GRAVITY = -9.81;  // [m/s/s]
+    bool perform_calibration_, is_calibrated_;
+    int calibration_samples_;
+    std::map<std::string,double> acceleration_bias_, gyroscope_bias_;
+
+    // Covariance
     double linear_acc_stdev_, angular_vel_stdev_, magnetic_field_stdev_;
     boost::array<double, 9> linear_acc_covar_;
     boost::array<double, 9> angular_vel_covar_;
     boost::array<double, 9> magnetic_field_covar_;
+
     // Used for mag scaling
-    double mag_x_min_, mag_x_max_;
+    double mag_x_min_, mag_x_max_;  //  [mG]
     double mag_y_min_, mag_y_max_;
     double mag_z_min_, mag_z_max_;
-    static const double MILIGAUSS_TO_TESLA_SCALE = 0.0000001; // From Milligauss [mG] to Tesla [T]
+    static const double MILIGAUSS_TO_TESLA_SCALE = 0.0000001;  // From Milligauss [mG] to Tesla [T]
+
     // ROS pub/sub
     ros::Publisher imu_pub_;
     ros::Publisher mag_pub_;
     ros::Subscriber raw_sub_;
+
     // ROS Member functions
     void rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg);
     void fillRowMajor(boost::array<double, 9> & covar, double stdev);

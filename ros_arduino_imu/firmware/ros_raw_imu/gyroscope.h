@@ -1,23 +1,13 @@
 #ifndef _GYROSCOPE_H_
 #define _GYROSCOPE_H_
 
-#include <Arduino.h>
-#include <ros.h>
-#include <ros/time.h>
-#include <geometry_msgs/Vector3.h>
-
-float gyroscope_offset[3] = {0.0,0.0,0.0};
-float gyroscope_samples[3] = {0.0,0.0,0.0};
-uint16_t gyroscope_total_samples = 1000;
-
 uint8_t gyro_reads = 0;
 byte gyro_buffer[6];
 
 bool check_gyroscope();
-bool remove_gyroscope_bias();
 
 geometry_msgs::Vector3 raw_rotation;
-geometry_msgs::Vector3 measure_gyroscope();
+void measure_gyroscope();
 
 #if defined(ITG3205)
   #include "gyroscope_ITG3205.h"

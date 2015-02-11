@@ -1,7 +1,6 @@
 #ifndef _IMU_WIRE_H_
 #define _IMU_WIRE_H_
 
-#include <Arduino.h>
 
 void send_value(int device_address, byte value) {
 
