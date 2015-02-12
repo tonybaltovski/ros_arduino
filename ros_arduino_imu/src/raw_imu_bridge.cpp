@@ -7,51 +7,66 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   use_accelerometer_(true),
   use_gyroscope_(true),
   use_magnetometer_(true),
-  use_mag_msg_(false)
+  use_mag_msg_(false),
+  perform_calibration_(true),
+  is_calibrated_(false)
 {
   pnh.param<bool>("imu/use_accelerometer", use_accelerometer_, use_accelerometer_);
   pnh.param<bool>("imu/use_gyroscope", use_gyroscope_, use_gyroscope_);
   pnh.param<bool>("imu/use_magnetometer", use_magnetometer_, use_magnetometer_);
-  pnh.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
-  pnh.param<std::string>("imu/frame_id", frame_id_, "imu_link");
+  pnh.param<bool>("imu/perform_calibration", perform_calibration_, perform_calibration_);
 
-  pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.001);
-  pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.001);
-  pnh.param<double>("imu/magnetic_field_stdev", magnetic_field_stdev_, 0.001);
+  raw_sub_ = nh_.subscribe("raw_imu", 5, &RawImuBridge::rawCallback, this);
 
-  raw_sub_ = nh_.subscribe("raw_imu", 1, &RawImuBridge::rawCallback, this);
-  
-  if(use_accelerometer_ || use_gyroscope_)
+  if (use_accelerometer_ || use_gyroscope_)
   {
-    imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 1);
+    if (!perform_calibration_)
+    {
+      pnh.getParam("imu/accelerometer_bias", acceleration_bias_);
+      pnh.getParam("imu/gyroscope_bias", gyroscope_bias_);
+    }
+    else
+    {
+      pnh.param<int>("imu/calibration_samples", calibration_samples_, 1000);
+    }
+
+    imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 5);
+
+    pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.0);
     RawImuBridge::fillRowMajor(linear_acc_covar_, linear_acc_stdev_);
+    pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.0);
     RawImuBridge::fillRowMajor(angular_vel_covar_, angular_vel_stdev_);
   }
 
-  if(use_magnetometer_)
+  if (use_magnetometer_)
   {
-    if(use_mag_msg_)
+
+    // Magnetometer calibration values.
+    pnh.param<double>("mag/x/min", mag_x_min_, -520);
+    pnh.param<double>("mag/x/max", mag_x_max_,  846);
+    pnh.param<double>("mag/y/min", mag_y_min_, -574);
+    pnh.param<double>("mag/y/max", mag_y_max_,  638);
+    pnh.param<double>("mag/z/min", mag_z_min_, -626);
+    pnh.param<double>("mag/z/max", mag_z_max_,  552);
+
+    pnh.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
+
+    if (use_mag_msg_)
     {
-      mag_pub_ = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 1);
+      mag_pub_ = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 5);
+
+      pnh.param<double>("imu/magnetic_field_stdev", magnetic_field_stdev_, 0.0);
       RawImuBridge::fillRowMajor(magnetic_field_covar_, magnetic_field_stdev_);
     }
     else
     {
-      mag_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("imu/mag", 1);
+      mag_pub_ = nh_.advertise<geometry_msgs::Vector3Stamped>("imu/mag", 5);
     }
   }
-  
 
-  // Fill covar matrices
-  // Magnetometer calibration values.
-  pnh.param<double>("mag/x/min", mag_x_min_, -520);
-  pnh.param<double>("mag/x/max", mag_x_max_,  846);
-  pnh.param<double>("mag/y/min", mag_y_min_, -574);
-  pnh.param<double>("mag/y/max", mag_y_max_,  638);
-  pnh.param<double>("mag/z/min", mag_z_min_, -626);
-  pnh.param<double>("mag/z/max", mag_z_max_,  552);
 
   ROS_INFO("Starting Raw Imu Bridge.");
+
 }
 
 RawImuBridge::~RawImuBridge()
@@ -61,59 +76,106 @@ RawImuBridge::~RawImuBridge()
 
 void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
 {
-  if(!raw_msg->accelerometer && use_accelerometer_)
+  if (!raw_msg->accelerometer && use_accelerometer_)
   {
     ROS_ERROR_ONCE("Accelerometer not found!");
   }
-  if(!raw_msg->gyroscope && use_gyroscope_)
+  if (!raw_msg->gyroscope && use_gyroscope_)
   {
     ROS_ERROR_ONCE("Gyroscope not found!");
   }
-  if(!raw_msg->magnetometer && use_magnetometer_)
+  if (!raw_msg->magnetometer && use_magnetometer_)
   {
     ROS_ERROR_ONCE("Magnetometer not found!");
   }
 
-    if(use_accelerometer_ || use_gyroscope_)
+  if (perform_calibration_ && !is_calibrated_)
+  {
+    ROS_WARN_ONCE("Calibrating accelerometer and gyroscope, make sure robot is stationary and level.");
+
+    static int taken_samples;
+
+    if (taken_samples < calibration_samples_)
     {
-      sensor_msgs::Imu imu_msg;
-      imu_msg.header = raw_msg->header;
-      imu_msg.header.frame_id = frame_id_;
-      imu_msg.angular_velocity.x = raw_msg->raw_angular_velocity.x;
-      imu_msg.angular_velocity.y = raw_msg->raw_angular_velocity.y;
-      imu_msg.angular_velocity.z = raw_msg->raw_angular_velocity.z;
-      imu_msg.orientation_covariance = angular_vel_covar_;
-      imu_msg.linear_acceleration.x = raw_msg->raw_linear_acceleration.x;
-      imu_msg.linear_acceleration.y = raw_msg->raw_linear_acceleration.y;
-      imu_msg.linear_acceleration.z = raw_msg->raw_linear_acceleration.z;
-      imu_msg.linear_acceleration_covariance = linear_acc_covar_;
+      acceleration_bias_["x"] += raw_msg->raw_linear_acceleration.x;
+      acceleration_bias_["y"] += raw_msg->raw_linear_acceleration.y;
+      acceleration_bias_["z"] += raw_msg->raw_linear_acceleration.z;
+
+      gyroscope_bias_["x"] += raw_msg->raw_angular_velocity.x;
+      gyroscope_bias_["y"] += raw_msg->raw_angular_velocity.y;
+      gyroscope_bias_["z"] += raw_msg->raw_angular_velocity.z;
+
+      taken_samples++;
+    }
+    else
+    {
+      acceleration_bias_["x"] /= calibration_samples_;
+      acceleration_bias_["y"] /= calibration_samples_;
+      acceleration_bias_["z"] = acceleration_bias_["z"] / calibration_samples_ + GRAVITY;
+
+      gyroscope_bias_["x"] /= calibration_samples_;
+      gyroscope_bias_["y"] /= calibration_samples_;
+      gyroscope_bias_["z"] /= calibration_samples_;
+
+      ROS_INFO("Calibrating accelerometer and gyroscope complete.");
+      ROS_INFO("Bias values can be saved for reuse.");
+      ROS_INFO("Accelerometer: x:%f, y:%f, z:%f", acceleration_bias_["x"], acceleration_bias_["y"], acceleration_bias_["z"]);
+      ROS_INFO("Gyroscope: x:%f, y:%f, z:%f", gyroscope_bias_["x"], gyroscope_bias_["y"], gyroscope_bias_["z"]);
+
+      pnh_.setParam("imu/accelerometer_bias", acceleration_bias_);
+      pnh_.setParam("imu/gyroscope_bias", gyroscope_bias_);
+
+      is_calibrated_ = true;
+    }
+  }
+  else
+  {
+    if (use_accelerometer_ || use_gyroscope_)
+    {
+      sensor_msgs::ImuPtr imu_msg = boost::make_shared<sensor_msgs::Imu>();
+      imu_msg->header = raw_msg->header;
+
+      imu_msg->angular_velocity.x = raw_msg->raw_angular_velocity.x - gyroscope_bias_["x"];
+      imu_msg->angular_velocity.y = raw_msg->raw_angular_velocity.y - gyroscope_bias_["y"];
+      imu_msg->angular_velocity.z = raw_msg->raw_angular_velocity.z - gyroscope_bias_["z"];
+      imu_msg->orientation_covariance = angular_vel_covar_;
+
+      imu_msg->linear_acceleration.x = raw_msg->raw_linear_acceleration.x - acceleration_bias_["x"];
+      imu_msg->linear_acceleration.y = raw_msg->raw_linear_acceleration.y - acceleration_bias_["y"];
+      imu_msg->linear_acceleration.z = raw_msg->raw_linear_acceleration.z - acceleration_bias_["z"];
+      imu_msg->linear_acceleration_covariance = linear_acc_covar_;
+
       imu_pub_.publish(imu_msg);
     }
 
-    if(use_magnetometer_)
+    if (use_magnetometer_)
     {
-      if(use_mag_msg_)
+
+      if (use_mag_msg_)
       {
-        sensor_msgs::MagneticField mag_msg;
-        mag_msg.header = raw_msg->header;
-        mag_msg.header.frame_id = frame_id_;
-        mag_msg.magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.magnetic_field_covariance = magnetic_field_covar_;
+        sensor_msgs::MagneticFieldPtr mag_msg = boost::make_shared<sensor_msgs::MagneticField>();
+        mag_msg->header = raw_msg->header;
+
+        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field_covariance = magnetic_field_covar_;
+
         mag_pub_.publish(mag_msg);
       }
       else
       {
-        geometry_msgs::Vector3Stamped mag_msg;
-        mag_msg.header = raw_msg->header;
-        mag_msg.header.frame_id = frame_id_;
-        mag_msg.vector.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.vector.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg.vector.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        geometry_msgs::Vector3StampedPtr mag_msg = boost::make_shared<geometry_msgs::Vector3Stamped>();;
+        mag_msg->header = raw_msg->header;
+        
+        mag_msg->vector.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->vector.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->vector.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+
         mag_pub_.publish(mag_msg);
       }
     }
+  }
 }
 
 void RawImuBridge::fillRowMajor(boost::array<double, 9> & covar, double stdev)

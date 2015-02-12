@@ -29,7 +29,7 @@
  
  */
 
-#include <Wire.h>
+#include <Arduino.h>
 
 #include <ros.h>
 #include <ros/time.h>
@@ -38,14 +38,18 @@
 
 ros::NodeHandle nh;
 
+#if defined(WIRE_T3)
+  #include <i2c_t3.h>
+#else
+  #include <Wire.h>
+#endif
+
 #include "imu_configuration.h"
 
 uint32_t last_time = 0;
-uint8_t update_rate = 25; //Hz
+uint8_t update_rate = 50; //Hz
 
 bool is_first = true;
-bool is_accelerometer_calibrated = false;
-bool is_gyroscope_calibrated = false;
 
 ros_arduino_msgs::RawImu raw_imu_msg;
 ros::Publisher raw_imu_pub("raw_imu", &raw_imu_msg);
@@ -61,7 +65,12 @@ void setup()
     nh.spinOnce();
   }
   nh.loginfo("ROS Arduino IMU started.");
-  Wire.begin();                  
+  #if defined(WIRE_T3)
+    Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_400);
+  #else
+    Wire.begin();
+  #endif
+
   delay(5);
 }
 
@@ -95,34 +104,28 @@ void loop()
     }
     else if (millis() - last_time >= 1000/update_rate)
     {
-      if(!is_accelerometer_calibrated && !is_gyroscope_calibrated)
+      raw_imu_msg.header.stamp = nh.now();
+      raw_imu_msg.header.frame_id = "imu_link";
+      if (raw_imu_msg.accelerometer)
       {
-        nh.logwarn("Calibrating IMU! Hold still.");
-        is_accelerometer_calibrated = remove_acceleration_bias();
-        is_gyroscope_calibrated = remove_gyroscope_bias();
-        nh.logwarn("IMU Calibration Complete");
+        measure_acceleration();
+        raw_imu_msg.raw_linear_acceleration = raw_acceleration;
       }
-      else
+      
+      if (raw_imu_msg.gyroscope)
       {
-        raw_imu_msg.header.stamp = nh.now();
-        raw_imu_msg.header.frame_id = "imu_link";
-        if (raw_imu_msg.accelerometer)
-        {
-          raw_imu_msg.raw_linear_acceleration = measure_acceleration();
-        }
-        
-        if (raw_imu_msg.gyroscope)
-        {
-          raw_imu_msg.raw_angular_velocity = measure_gyroscope();
-        }
-        
-        if (raw_imu_msg.magnetometer)
-        {
-          raw_imu_msg.raw_magnetic_field = measure_magnetometer();
-        }
+        measure_gyroscope();
+        raw_imu_msg.raw_angular_velocity = raw_rotation;
+      }
+      
+      if (raw_imu_msg.magnetometer)
+      {
+        measure_magnetometer();
+        raw_imu_msg.raw_magnetic_field = raw_magnetic_field;
+      }
 
-        raw_imu_pub.publish(&raw_imu_msg);
-      }
+      raw_imu_pub.publish(&raw_imu_msg);
+
       last_time = millis();
     }
   }

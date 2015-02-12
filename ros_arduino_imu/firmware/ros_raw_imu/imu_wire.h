@@ -1,7 +1,6 @@
 #ifndef _IMU_WIRE_H_
 #define _IMU_WIRE_H_
 
-#include <Arduino.h>
 
 void send_value(int device_address, byte value) {
 
@@ -17,7 +16,7 @@ void write_to_register(int device_address, byte register_address, byte register_
   Wire.write(register_value);
   Wire.endTransmission();
 
-}  
+}
 
 byte check_ID(int device_address, byte register_address) {
 

@@ -1,8 +1,6 @@
 #ifndef _ACCELEROMETER_ADXL345_H_
 #define _ACCELEROMETER_ADXL345_H_
 
-#include <Arduino.h>
-#include <math.h>
 #include "accelerometer.h"
 
 //ADXL345 REGISTERS
@@ -30,36 +28,8 @@ bool check_accelerometer()
   else
     return false;
 }
-bool remove_acceleration_bias()
-{
-  for (uint16_t samples = 0; samples < acceleration_total_samples; samples++)
-  {
-    acc_reads = 0;
-    send_value(ADXL345_ACCELEROMETER_ADDRESS, ADXL345_DATAX0);
-    Wire.requestFrom(ADXL345_ACCELEROMETER_ADDRESS, 6);
-    while(Wire.available())
-    {
-      acc_buffer[acc_reads] = Wire.read();
-      acc_reads++;
-    }
 
-    acceleration_samples[ACC_X_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS])) / ADXL345_SCALE;
-    acceleration_samples[ACC_Y_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS])) / ADXL345_SCALE;
-    acceleration_samples[ACC_Z_AXIS] +=((float)((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS])) / ADXL345_SCALE;
-    nh.spinOnce();
-    delay(5);
-  }
-  acceleration_bias[ACC_X_AXIS] = -(acceleration_samples[ACC_X_AXIS] / acceleration_total_samples);
-  acceleration_bias[ACC_Y_AXIS] = -(acceleration_samples[ACC_Y_AXIS] / acceleration_total_samples);
-  acceleration_bias[ACC_Z_AXIS] = -(acceleration_samples[ACC_Z_AXIS] / acceleration_total_samples) - GRAVITY;
-  acceleration_samples[ACC_X_AXIS] = 0;
-  acceleration_samples[ACC_Y_AXIS] = 0;
-  acceleration_samples[ACC_Z_AXIS] = 0;
-
-  return true;
-}
-
-geometry_msgs::Vector3 measure_acceleration()
+void measure_acceleration()
 {
   acc_reads = 0;
   send_value(ADXL345_ACCELEROMETER_ADDRESS, ADXL345_DATAX0);
@@ -69,11 +39,11 @@ geometry_msgs::Vector3 measure_acceleration()
     acc_buffer[acc_reads] = Wire.read();
     acc_reads++;
   }
-  
-  raw_acceleration.x =  ((float)ACC_X_INVERT*((int16_t)acc_buffer[2*ACC_X_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_X_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_X_AXIS]);
-  raw_acceleration.y =  ((float)ACC_Y_INVERT*((int16_t)acc_buffer[2*ACC_Y_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Y_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_Y_AXIS]);
-  raw_acceleration.z =  ((float)ACC_Z_INVERT*((int16_t)acc_buffer[2*ACC_Z_AXIS+1]<<8 | (int16_t)acc_buffer[2*ACC_Z_AXIS]) / ADXL345_SCALE + acceleration_bias[ACC_Z_AXIS]);
-  return raw_acceleration;
+
+  raw_acceleration.x =  ((float)ACC_X_INVERT*(int16_t)((int)acc_buffer[2*ACC_X_AXIS+1]<<8 | acc_buffer[2*ACC_X_AXIS]) / ADXL345_SCALE);
+  raw_acceleration.y =  ((float)ACC_Y_INVERT*(int16_t)((int)acc_buffer[2*ACC_Y_AXIS+1]<<8 | acc_buffer[2*ACC_Y_AXIS]) / ADXL345_SCALE);
+  raw_acceleration.z =  ((float)ACC_Z_INVERT*(int16_t)((int)acc_buffer[2*ACC_Z_AXIS+1]<<8 | acc_buffer[2*ACC_Z_AXIS]) / ADXL345_SCALE);
+
 }
 
 #endif  // _ACCELEROMETER_ADXL345_H_

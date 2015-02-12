@@ -1,6 +1,7 @@
 #ifndef _MAGNETOMETER_HMC5883L_H_
 #define _MAGNETOMETER_HMC5883L_H_
 
+//HMC5883L REGISTERS
 #define HMC5883L_MAG_ADDRESS 0x1E
 #define HMC5883L_MAG_ID 0x10
 #define HMC5883L_MAG_REG_A 0x00
@@ -21,7 +22,7 @@ bool check_magnetometer()
   return true;;
 }
 
-geometry_msgs::Vector3 measure_magnetometer()
+void measure_magnetometer()
 {
   mag_reads = 0;
   send_value(HMC5883L_MAG_ADDRESS,HMC5883L_MAG_DATAX0);
@@ -31,11 +32,11 @@ geometry_msgs::Vector3 measure_magnetometer()
     mag_buffer[mag_reads] = Wire.read();
     mag_reads++;
   }
-  raw_magnetic_field.x =  (float)(MAG_X_INVERT * ((int16_t)(mag_buffer[2*MAG_X_AXIS] << 8) | (mag_buffer[2*MAG_X_AXIS+1]))) * HMC5883L_MAG_SCALE; 
-  raw_magnetic_field.y =  (float)(MAG_Y_INVERT * ((int16_t)(mag_buffer[2*MAG_Y_AXIS] << 8) | (mag_buffer[2*MAG_Y_AXIS+1]))) * HMC5883L_MAG_SCALE;
-  raw_magnetic_field.z =  (float)(MAG_Z_INVERT * ((int16_t)(mag_buffer[2*MAG_Z_AXIS] << 8) | (mag_buffer[2*MAG_Z_AXIS+1]))) * HMC5883L_MAG_SCALE;
+  raw_magnetic_field.x =  (float)(MAG_X_INVERT * ((int16_t)((int)mag_buffer[2*MAG_X_AXIS] << 8) | (mag_buffer[2*MAG_X_AXIS+1]))) * HMC5883L_MAG_SCALE; 
+  raw_magnetic_field.y =  (float)(MAG_Y_INVERT * ((int16_t)((int)mag_buffer[2*MAG_Y_AXIS] << 8) | (mag_buffer[2*MAG_Y_AXIS+1]))) * HMC5883L_MAG_SCALE;
+  raw_magnetic_field.z =  (float)(MAG_Z_INVERT * ((int16_t)((int)mag_buffer[2*MAG_Z_AXIS] << 8) | (mag_buffer[2*MAG_Z_AXIS+1]))) * HMC5883L_MAG_SCALE;
   write_to_register(HMC5883L_MAG_ADDRESS,HMC5883L_MAG_MODE,0x01);
-  return raw_magnetic_field;
+
 }
 
 #endif  // _MAGNETOMETER_HMC5883L_H_
