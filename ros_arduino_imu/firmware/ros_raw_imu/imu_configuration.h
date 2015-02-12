@@ -14,8 +14,8 @@
 // Select your IMU board from the list below.
 // If not avaliable, define a custom one but feel free to added it.
 //#define SEN10724
-//#define GY85
-#define GY80
+#define GY85
+//#define GY80
 //#define OTHER
 
 #if defined(SEN10724)

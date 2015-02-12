@@ -93,7 +93,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
   {
     ROS_WARN_ONCE("Calibrating accelerometer and gyroscope, make sure robot is stationary and level.");
 
-    if (calibration_samples_ >= 0)
+    static int taken_samples;
+
+    if (taken_samples < calibration_samples_)
     {
       acceleration_bias_["x"] += raw_msg->raw_linear_acceleration.x;
       acceleration_bias_["y"] += raw_msg->raw_linear_acceleration.y;
@@ -103,17 +105,17 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
       gyroscope_bias_["y"] += raw_msg->raw_angular_velocity.y;
       gyroscope_bias_["z"] += raw_msg->raw_angular_velocity.z;
 
-      calibration_samples_--;
+      taken_samples++;
     }
     else
     {
-      acceleration_bias_["x"] /= 1000;
-      acceleration_bias_["y"] /= 1000;
-      acceleration_bias_["z"] = acceleration_bias_["z"] / 1000 + GRAVITY;
+      acceleration_bias_["x"] /= calibration_samples_;
+      acceleration_bias_["y"] /= calibration_samples_;
+      acceleration_bias_["z"] = acceleration_bias_["z"] / calibration_samples_ + GRAVITY;
 
-      gyroscope_bias_["x"] /= 1000;
-      gyroscope_bias_["y"] /= 1000;
-      gyroscope_bias_["z"] /= 1000;
+      gyroscope_bias_["x"] /= calibration_samples_;
+      gyroscope_bias_["y"] /= calibration_samples_;
+      gyroscope_bias_["z"] /= calibration_samples_;
 
       ROS_INFO("Calibrating accelerometer and gyroscope complete.");
       ROS_INFO("Bias values can be saved for reuse.");
@@ -154,9 +156,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         sensor_msgs::MagneticFieldPtr mag_msg = boost::make_shared<sensor_msgs::MagneticField>();
         mag_msg->header = raw_msg->header;
 
-        mag_msg->magnetic_field.x = (double)(raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.y = (double)(raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.z = (double)(raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
         mag_msg->magnetic_field_covariance = magnetic_field_covar_;
 
         mag_pub_.publish(mag_msg);
@@ -166,9 +168,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         geometry_msgs::Vector3StampedPtr mag_msg = boost::make_shared<geometry_msgs::Vector3Stamped>();;
         mag_msg->header = raw_msg->header;
         
-        mag_msg->vector.x = (double)(raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->vector.y = (double)(raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->vector.z = (double)(raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->vector.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->vector.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->vector.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
 
         mag_pub_.publish(mag_msg);
       }

@@ -56,7 +56,7 @@ ros::Publisher raw_imu_pub("raw_imu", &raw_imu_msg);
 
 void setup()
 {
-  //nh.getHardware()->setBaud(BAUD);
+  nh.getHardware()->setBaud(BAUD);
   nh.initNode();
   nh.advertise(raw_imu_pub);
   // Wait for ROSserial to connect
