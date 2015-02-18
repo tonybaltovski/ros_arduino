@@ -28,6 +28,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #define _RAW_IMU_BRIDGE_H_
 
 #include <ros/ros.h>
+#include <std_srvs/Empty.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/MagneticField.h>
 #include <geometry_msgs/Vector3Stamped.h>
@@ -37,7 +38,7 @@ class RawImuBridge
 {
   private:
     ros::NodeHandle nh_, pnh_;
-    
+
     bool use_accelerometer_, use_gyroscope_, use_magnetometer_;
     bool use_mag_msg_;
 
@@ -53,7 +54,7 @@ class RawImuBridge
     boost::array<double, 9> magnetic_field_covar_;
 
     // Used for mag scaling
-    double mag_x_min_, mag_x_max_;  //  [mG]
+    double mag_x_min_, mag_x_max_;  //  [T]
     double mag_y_min_, mag_y_max_;
     double mag_z_min_, mag_z_max_;
     static const double MILIGAUSS_TO_TESLA_SCALE = 0.0000001;  // From Milligauss [mG] to Tesla [T]
@@ -63,9 +64,15 @@ class RawImuBridge
     ros::Publisher mag_pub_;
     ros::Subscriber raw_sub_;
 
-    // ROS Member functions
+    // ROS services
+    ros::ServiceServer imu_cal_srv_;
+
+    // ROS member functions
     void rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg);
+    bool calibrateCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
+    // Non-ROS member functions
     void fillRowMajor(boost::array<double, 9> & covar, double stdev);
+
   public:
     RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh);
     virtual ~RawImuBridge();
