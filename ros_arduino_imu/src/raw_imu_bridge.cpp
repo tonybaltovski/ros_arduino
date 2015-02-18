@@ -51,12 +51,12 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   {
 
     // Magnetometer calibration values.
-    pnh_.param<double>("mag/x/min", mag_x_min_, -520);
-    pnh_.param<double>("mag/x/max", mag_x_max_,  846);
-    pnh_.param<double>("mag/y/min", mag_y_min_, -574);
-    pnh_.param<double>("mag/y/max", mag_y_max_,  638);
-    pnh_.param<double>("mag/z/min", mag_z_min_, -626);
-    pnh_.param<double>("mag/z/max", mag_z_max_,  552);
+    pnh_.param<double>("mag/x/min", mag_x_min_, -0.000078936);
+    pnh_.param<double>("mag/x/max", mag_x_max_,  0.000077924);
+    pnh_.param<double>("mag/y/min", mag_y_min_, -0.000075532);
+    pnh_.param<double>("mag/y/max", mag_y_max_,  0.000076360);
+    pnh_.param<double>("mag/z/min", mag_z_min_, -0.000079948);
+    pnh_.param<double>("mag/z/max", mag_z_max_,  0.000064216);
 
     pnh_.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
 
@@ -163,9 +163,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         sensor_msgs::MagneticFieldPtr mag_msg = boost::make_shared<sensor_msgs::MagneticField>();
         mag_msg->header = raw_msg->header;
 
-        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x * MILIGAUSS_TO_TESLA_SCALE - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_);
+        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y * MILIGAUSS_TO_TESLA_SCALE - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_);
+        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z * MILIGAUSS_TO_TESLA_SCALE - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_);
         mag_msg->magnetic_field_covariance = magnetic_field_covar_;
 
         mag_pub_.publish(mag_msg);
