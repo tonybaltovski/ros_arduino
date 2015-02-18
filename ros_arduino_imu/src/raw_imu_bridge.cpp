@@ -11,30 +11,39 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   perform_calibration_(true),
   is_calibrated_(false)
 {
-  pnh.param<bool>("imu/use_accelerometer", use_accelerometer_, use_accelerometer_);
-  pnh.param<bool>("imu/use_gyroscope", use_gyroscope_, use_gyroscope_);
-  pnh.param<bool>("imu/use_magnetometer", use_magnetometer_, use_magnetometer_);
-  pnh.param<bool>("imu/perform_calibration", perform_calibration_, perform_calibration_);
+  pnh_.param<bool>("imu/use_accelerometer", use_accelerometer_, use_accelerometer_);
+  pnh_.param<bool>("imu/use_gyroscope", use_gyroscope_, use_gyroscope_);
+  pnh_.param<bool>("imu/use_magnetometer", use_magnetometer_, use_magnetometer_);
+  pnh_.param<bool>("imu/perform_calibration", perform_calibration_, perform_calibration_);
 
   raw_sub_ = nh_.subscribe("raw_imu", 5, &RawImuBridge::rawCallback, this);
 
+  imu_cal_srv_ = nh_.advertiseService("imu/calibrate_imu", &RawImuBridge::calibrateCallback, this);
+
   if (use_accelerometer_ || use_gyroscope_)
   {
-    if (!perform_calibration_)
+
+    if (!pnh_.getParam("imu/accelerometer_bias", acceleration_bias_) || 
+        !pnh_.getParam("imu/gyroscope_bias", gyroscope_bias_))
     {
-      pnh.getParam("imu/accelerometer_bias", acceleration_bias_);
-      pnh.getParam("imu/gyroscope_bias", gyroscope_bias_);
+      ROS_WARN("IMU calibration NOT found.");
+      is_calibrated_ = false;
     }
     else
     {
-      pnh.param<int>("imu/calibration_samples", calibration_samples_, 1000);
+      ROS_INFO("IMU calibration found.");
+      pnh_.getParam("imu/accelerometer_bias", acceleration_bias_);
+      pnh_.getParam("imu/gyroscope_bias", gyroscope_bias_);
     }
+
+    pnh_.param<int>("imu/calibration_samples", calibration_samples_, 500);
 
     imu_pub_ = nh_.advertise<sensor_msgs::Imu>("imu/data_raw", 5);
 
-    pnh.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.0);
+    pnh_.param<double>("imu/linear_acc_stdev", linear_acc_stdev_, 0.0);
     RawImuBridge::fillRowMajor(linear_acc_covar_, linear_acc_stdev_);
-    pnh.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.0);
+
+    pnh_.param<double>("imu/angular_vel_stdev", angular_vel_stdev_, 0.0);
     RawImuBridge::fillRowMajor(angular_vel_covar_, angular_vel_stdev_);
   }
 
@@ -42,20 +51,20 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
   {
 
     // Magnetometer calibration values.
-    pnh.param<double>("mag/x/min", mag_x_min_, -520);
-    pnh.param<double>("mag/x/max", mag_x_max_,  846);
-    pnh.param<double>("mag/y/min", mag_y_min_, -574);
-    pnh.param<double>("mag/y/max", mag_y_max_,  638);
-    pnh.param<double>("mag/z/min", mag_z_min_, -626);
-    pnh.param<double>("mag/z/max", mag_z_max_,  552);
+    pnh_.param<double>("mag/x/min", mag_x_min_, -0.000078936);
+    pnh_.param<double>("mag/x/max", mag_x_max_,  0.000077924);
+    pnh_.param<double>("mag/y/min", mag_y_min_, -0.000075532);
+    pnh_.param<double>("mag/y/max", mag_y_max_,  0.000076360);
+    pnh_.param<double>("mag/z/min", mag_z_min_, -0.000079948);
+    pnh_.param<double>("mag/z/max", mag_z_max_,  0.000064216);
 
-    pnh.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
+    pnh_.param<bool>("imu/use_mag_msg", use_mag_msg_, use_mag_msg_);
 
     if (use_mag_msg_)
     {
       mag_pub_ = nh_.advertise<sensor_msgs::MagneticField>("imu/mag", 5);
 
-      pnh.param<double>("imu/magnetic_field_stdev", magnetic_field_stdev_, 0.0);
+      pnh_.param<double>("imu/magnetic_field_stdev", magnetic_field_stdev_, 0.0);
       RawImuBridge::fillRowMajor(magnetic_field_covar_, magnetic_field_stdev_);
     }
     else
@@ -69,10 +78,6 @@ RawImuBridge::RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh):
 
 }
 
-RawImuBridge::~RawImuBridge()
-{
-
-}
 
 void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
 {
@@ -89,7 +94,7 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
     ROS_ERROR_ONCE("Magnetometer not found!");
   }
 
-  if (perform_calibration_ && !is_calibrated_)
+  if (perform_calibration_ || !is_calibrated_)
   {
     ROS_WARN_ONCE("Calibrating accelerometer and gyroscope, make sure robot is stationary and level.");
 
@@ -126,6 +131,8 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
       pnh_.setParam("imu/gyroscope_bias", gyroscope_bias_);
 
       is_calibrated_ = true;
+      perform_calibration_ = false;
+      taken_samples = 0;
     }
   }
   else
@@ -156,9 +163,9 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
         sensor_msgs::MagneticFieldPtr mag_msg = boost::make_shared<sensor_msgs::MagneticField>();
         mag_msg->header = raw_msg->header;
 
-        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_) * MILIGAUSS_TO_TESLA_SCALE;
-        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_) * MILIGAUSS_TO_TESLA_SCALE;
+        mag_msg->magnetic_field.x = (raw_msg->raw_magnetic_field.x * MILIGAUSS_TO_TESLA_SCALE - (mag_x_max_ - mag_x_min_) / 2 - mag_x_min_);
+        mag_msg->magnetic_field.y = (raw_msg->raw_magnetic_field.y * MILIGAUSS_TO_TESLA_SCALE - (mag_y_max_ - mag_y_min_) / 2 - mag_y_min_);
+        mag_msg->magnetic_field.z = (raw_msg->raw_magnetic_field.z * MILIGAUSS_TO_TESLA_SCALE - (mag_z_max_ - mag_z_min_) / 2 - mag_z_min_);
         mag_msg->magnetic_field_covariance = magnetic_field_covar_;
 
         mag_pub_.publish(mag_msg);
@@ -178,10 +185,22 @@ void RawImuBridge::rawCallback(const ros_arduino_msgs::RawImuConstPtr& raw_msg)
   }
 }
 
+bool RawImuBridge::calibrateCallback(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response)
+{
+  ROS_WARN("Calibrating accelerometer and gyroscope, make sure robot is stationary and level.");
+  perform_calibration_ = true;
+  return true;
+}
+
 void RawImuBridge::fillRowMajor(boost::array<double, 9> & covar, double stdev)
 {
   std::fill(covar.begin(), covar.end(), 0.0);
   covar[0] = pow(stdev, 2);  // X(roll)
   covar[4] = pow(stdev, 2);  // Y(pitch)
   covar[8] = pow(stdev, 2);  // Z(yaw)
+}
+
+RawImuBridge::~RawImuBridge()
+{
+
 }
