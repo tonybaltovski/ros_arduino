@@ -130,18 +130,18 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   left_counts_ = encoders_msg->left;
   right_counts_ = encoders_msg->right;
 
-  double dt = encoders_msg->header.stamp.toSec() - encoder_previous_time_.toSec();                          // [seconds]
-  double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;             // [m/s]
-  double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;          // [m/s]
+  double dt = encoders_msg->header.stamp.toSec() - encoder_previous_time_.toSec();                  // [seconds]
+  double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;     // [m/s]
+  double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;  // [m/s]
   double delta_s = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          + (left_counts_ - old_left_counts_)) / 2.0);                      // [m]
+                                          + (left_counts_ - old_left_counts_)) / 2.0);              // [m]
   double delta_theta = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          - (left_counts_ - old_left_counts_)) / base_width_);              // [radians]
-  double dx = delta_s * cos(theta_ + delta_theta / 2.0);                                                    // [m]
-  double dy = delta_s * sin(theta_ + delta_theta / 2.0);                                                    // [m]
-  x_ += dx;                                                                                                 // [m]
-  y_ += dy;                                                                                                 // [m]
-  theta_ += delta_theta;                                                                                    // [radians]
+                                          - (left_counts_ - old_left_counts_)) / base_width_);      // [radians]
+  double dx = delta_s * cos(theta_ + delta_theta / 2.0);                                            // [m]
+  double dy = delta_s * sin(theta_ + delta_theta / 2.0);                                            // [m]
+  x_ += dx;                                                                                         // [m]
+  y_ += dy;                                                                                         // [m]
+  theta_ += delta_theta;                                                                            // [radians]
   geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
   if (publish_tf_)

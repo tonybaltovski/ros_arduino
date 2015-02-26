@@ -69,22 +69,22 @@ class ROSArduinoBase
     boost::array<double, 36> pose_covar_;
     boost::array<double, 36> twist_covar_;
     // Odom variables
-    double x_, y_;                                                                                       // [m]
-    double theta_;                                                                                       // [radians]
-    double dx_, dy_;                                                                                     // [m/s]
-    double dtheta_;                                                                                      // [radians/s]
+    double x_, y_;                                // [m]
+    double theta_;                                // [radians]
+    double dx_, dy_;                              // [m/s]
+    double dtheta_;                               // [radians/s]
     // Encoder variables
-    int32_t right_counts_, left_counts_;                                                                 // [counts]
-    int32_t old_right_counts_, old_left_counts_;                                                         // [counts]
+    int32_t right_counts_, left_counts_;          // [counts]
+    int32_t old_right_counts_, old_left_counts_;  // [counts]
     // Control variables
     double gains_[3];
     // Vehicle characteristics
-    double counts_per_rev_;                                                                              // [counts/rev]
+    double counts_per_rev_;                       // [counts/rev]
     double gear_ratio_;
     int encoder_on_motor_shaft_;
-    double wheel_radius_;                                                                                // [m]
-    double base_width_;                                                                                  // [m]
-    double meters_per_counts_;                                                                           // [m/counts]
+    double wheel_radius_;                         // [m]
+    double base_width_;                           // [m]
+    double meters_per_counts_;                    // [m/counts]
     // ROS Member functions 
     void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
     void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
