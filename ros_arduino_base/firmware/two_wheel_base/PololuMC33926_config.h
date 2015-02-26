@@ -13,11 +13,11 @@ void setupMotors()
   left_motor.init();
   right_motor.init();
 }
-void commandLeftMotor(int cmd)
+void commandLeftMotor(int16_t cmd)
 {
   left_motor.set_pwm(cmd);
 }
-void commandRightMotor(int cmd)
+void commandRightMotor(int16_t cmd)
 {
   right_motor.set_pwm(cmd);
 }

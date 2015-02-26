@@ -47,8 +47,7 @@ POSSIBILITY OF SUCH DAMAGE.
 class ROSArduinoBase
 {
   private:
-    ros::NodeHandle nh_;
-    ros::NodeHandle nh_private_;
+    ros::NodeHandle nh_, pnh_;
     // Subsribers
     ros::Subscriber encoders_sub_;
     ros::Subscriber cmd_vel_sub_;
@@ -64,35 +63,36 @@ class ROSArduinoBase
     ros::Time encoder_previous_time_;
     tf::TransformBroadcaster *odom_broadcaster_;
     std::string base_frame_, odom_frame_;
+    bool custom_covar_;
     double pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_;
     double twist_x_stdev_, twist_y_stdev_, twist_yaw_stdev_;
     boost::array<double, 36> pose_covar_;
     boost::array<double, 36> twist_covar_;
     // Odom variables
-    double x_, y_;  // [m]
-    double theta_;  // [radians]
-    double dx_, dy_;  // [m/s]
-    double dtheta_;  // [radians/s]
+    double x_, y_;                                                                                       // [m]
+    double theta_;                                                                                       // [radians]
+    double dx_, dy_;                                                                                     // [m/s]
+    double dtheta_;                                                                                      // [radians/s]
     // Encoder variables
-    int32_t right_counts_, left_counts_;  // [counts]
-    int32_t old_right_counts_, old_left_counts_;  // [counts]
+    int32_t right_counts_, left_counts_;                                                                 // [counts]
+    int32_t old_right_counts_, old_left_counts_;                                                         // [counts]
     // Control variables
     double gains_[3];
     // Vehicle characteristics
-    double counts_per_rev_;  // [counts/rev]
+    double counts_per_rev_;                                                                              // [counts/rev]
     double gear_ratio_;
     int encoder_on_motor_shaft_;
-    double wheel_radius_;  // [m]
-    double base_width_;  // [m]
-    double meters_per_counts_;  // [m/counts]
-    // ROS Member functions
+    double wheel_radius_;                                                                                // [m]
+    double base_width_;                                                                                  // [m]
+    double meters_per_counts_;                                                                           // [m/counts]
+    // ROS Member functions 
     void cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg);
     void encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr& encoders_msg);
     void motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level);
     // Other Member functions
     void fillCovar(boost::array<double, 36> & covar, double x_stdev, double y_stdev, double yaw_stdev);
   public:
-    ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private);
-    virtual ~ROSArduinoBase();
+    ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle pnh);
+    virtual ~ROSArduinoBase(void){};
 };
 #endif // _ROS_ARDUINO_BASE_H_

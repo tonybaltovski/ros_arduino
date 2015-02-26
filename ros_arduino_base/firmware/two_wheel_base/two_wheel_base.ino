@@ -69,14 +69,14 @@
 #include "motor_driver_config.h"
 
 typedef struct {
-  float desired_velocity;  // [m/s]
-  uint32_t current_time;  // [miliseconds]
-  uint32_t previous_time;  // [miliseconds]
-  int32_t current_encoder;  // [counts]
-  int32_t previous_encoder;  // [counts]
-  float previous_error;  // 
-  float total_error;  // 
-  int command; // [PWM]
+  float desired_velocity;     // [m/s]
+  uint32_t current_time;      // [milliseconds]
+  uint32_t previous_time;     // [milliseconds]
+  int32_t current_encoder;    // [counts]
+  int32_t previous_encoder;   // [counts]
+  float previous_error;       // 
+  float total_error;          // 
+  int16_t command;            // [PWM]
 }
 ControlData;
 
@@ -88,8 +88,8 @@ Encoder right_encoder(RIGHT_ENCODER_A,RIGHT_ENCODER_B);
 float counts_per_rev[1];
 float gear_ratio[1];
 int encoder_on_motor_shaft[1];
-float wheel_radius[1]; // [m]
-float meters_per_counts;  // [m/counts]
+float wheel_radius[1];         // [m]
+float meters_per_counts;       // [m/counts]
 int pwm_range[1];
 
 // Gains;
@@ -101,17 +101,21 @@ ControlData left_motor_controller;
 ControlData right_motor_controller;
 
 // Control methods prototypes
-void updateControl(ControlData * ctrl);
+void updateControl(ControlData * ctrl, int32_t encoder_reading);
 void doControl(ControlData * ctrl);
 void Control();
 
-int control_rate[1];  // Hz
-int encoder_rate[1];  // Hz
-int no_cmd_timeout[1]; // seconds
+int control_rate[1];   // [Hz]
+int encoder_rate[1];   // [Hz]
+int no_cmd_timeout[1]; // [seconds]
 
-uint32_t last_encoders_time;  // miliseconds
-uint32_t last_cmd_time;  // miliseconds
-uint32_t last_control_time;  // miliseconds
+
+uint32_t up_time;             // [milliseconds]
+uint32_t last_encoders_time;  // [milliseconds]
+uint32_t last_cmd_time;       // [milliseconds]
+uint32_t last_control_time;   // [milliseconds]
+uint32_t last_status_time;    // [milliseconds]
+
 
 // ROS node
 ros::NodeHandle_<ArduinoHardware, 10, 10, 1024, 1024> nh;
@@ -140,6 +144,7 @@ void setup()
   nh.getHardware()->setBaud(BAUD);
   nh.initNode();
 
+  encoders_msg.header.frame_id = frame_id;
   // Pub/Sub
   nh.advertise(pub_encoders);
   nh.subscribe(sub_diff_vel);
@@ -217,7 +222,6 @@ void loop()
   { 
     encoders_msg.left = left_encoder.read();
     encoders_msg.right = right_encoder.read();
-    encoders_msg.header.frame_id = frame_id;
     encoders_msg.header.stamp = nh.now();
     pub_encoders.publish(&encoders_msg);
     last_encoders_time = millis();
@@ -245,13 +249,12 @@ void cmdDiffVelCallback( const ros_arduino_msgs::CmdDiffVel& diff_vel_msg)
   last_cmd_time = millis();
 }
 
-void updateControl()
+void updateControl(ControlData * ctrl, int32_t encoder_reading)
 {
-  left_motor_controller.current_encoder = left_encoder.read();
-  left_motor_controller.current_time = millis();
-  right_motor_controller.current_encoder = right_encoder.read();
-  right_motor_controller.current_time = millis();
+  ctrl->current_encoder = encoder_reading;
+  ctrl->current_time = millis();;
 }
+
 void doControl(ControlData * ctrl)
 {
   float estimated_velocity = meters_per_counts * (ctrl->current_encoder - ctrl->previous_encoder) * 1000.0 / (ctrl->current_time - ctrl->previous_time);
@@ -282,29 +285,15 @@ void doControl(ControlData * ctrl)
 
 void Control()
 {
-  updateControl();
+  updateControl(&left_motor_controller, left_encoder.read());
+  updateControl(&right_motor_controller, right_encoder.read());
 
   doControl(&left_motor_controller);
   doControl(&right_motor_controller);
 
-
-  if(left_motor_controller.desired_velocity > 0 || left_motor_controller.desired_velocity < 0)
-  {
-    commandLeftMotor(left_motor_controller.command);
-  }
-  else
-  {
-    commandLeftMotor(0);
-  }
-
-  if(right_motor_controller.desired_velocity > 0 || right_motor_controller.desired_velocity < 0)
-  {
-    commandRightMotor(right_motor_controller.command);
-  }
-  else
-  {
-    commandRightMotor(0);
-  }
+  commandLeftMotor(left_motor_controller.command);
+  commandRightMotor(right_motor_controller.command);
+  
 }
 
 void updateGainsCb(const ros_arduino_base::UpdateGains::Request & req, ros_arduino_base::UpdateGains::Response & res)

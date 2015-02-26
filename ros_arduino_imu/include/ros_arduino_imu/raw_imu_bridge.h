@@ -75,7 +75,7 @@ class RawImuBridge
 
   public:
     RawImuBridge(ros::NodeHandle nh, ros::NodeHandle pnh);
-    virtual ~RawImuBridge();
+    virtual ~RawImuBridge(void){};
 };
 
 #endif  // _RAW_IMU_BRIDGE_H_

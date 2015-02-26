@@ -2,8 +2,8 @@
 #define _MOTOR_DRIVER_CONFIG_H_
 
 void setupMotors();
-void commandLeftMotor(int cmd);
-void commandRightMotor(int cmd);
+void commandLeftMotor(int16_t cmd);
+void commandRightMotor(int16_t cmd);
 
 #if defined(PololuMC33926)
   #include "PololuMC33926_config.h"

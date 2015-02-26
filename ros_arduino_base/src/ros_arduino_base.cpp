@@ -31,9 +31,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <math.h>
 #include "ros_arduino_base/ros_arduino_base.h"
 
-ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
+ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle pnh):
   nh_(nh),
-  nh_private_(nh_private),
+  pnh_(pnh),
   x_(0.0),
   y_(0.0),
   theta_(0.0),
@@ -55,20 +55,14 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   gain_server_.setCallback(f);
 
   // ROS driver params
-  nh_private.param<bool>("publish_tf", publish_tf_, false);
-  nh_private.param<std::string>("odom/odom_frame_id", odom_frame_, "odom");
-  nh_private.param<std::string>("odom/base_frame_id", base_frame_, "base_link");
-  nh_private.param<double>("pose_stdev/x", pose_x_stdev_, 0.01);
-  nh_private.param<double>("pose_stdev/y", pose_y_stdev_, 0.01);
-  nh_private.param<double>("pose_stdev/yaw", pose_yaw_stdev_, 0.01);
-  nh_private.param<double>("twist_stdev/x", twist_x_stdev_, 0.01);
-  nh_private.param<double>("twist_stdev/y", twist_y_stdev_, 0.01);
-  nh_private.param<double>("twist_stdev/yaw", twist_yaw_stdev_, 0.01);
-  nh_private.param<double>("counts_per_rev", counts_per_rev_, 48.0);
-  nh_private.param<double>("gear_ratio", gear_ratio_, (75.0 / 1.0));
-  nh_private.param<int>("encoder_on_motor_shaft", encoder_on_motor_shaft_, 1);
-  nh_private.param<double>("wheel_radius", wheel_radius_, (0.120 / 2.0));
-  nh_private.param<double>("base_width", base_width_ , 0.225);
+  pnh_.param<bool>("publish_tf", publish_tf_, false);
+  pnh_.param<std::string>("odom/odom_frame_id", odom_frame_, "odom");
+  pnh_.param<std::string>("odom/base_frame_id", base_frame_, "base_link");
+  pnh_.param<double>("counts_per_rev", counts_per_rev_, 48.0);
+  pnh_.param<double>("gear_ratio", gear_ratio_, (75.0 / 1.0));
+  pnh_.param<int>("encoder_on_motor_shaft", encoder_on_motor_shaft_, 1);
+  pnh_.param<double>("wheel_radius", wheel_radius_, (0.120 / 2.0));
+  pnh_.param<double>("base_width", base_width_ , 0.225);
 
   if (encoder_on_motor_shaft_ == 1)
   {
@@ -78,17 +72,24 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle nh_private):
   {
     meters_per_counts_ = ((M_PI * 2 * wheel_radius_) / counts_per_rev_);
   }
-  ROSArduinoBase::fillCovar(pose_covar_, pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_);
-  ROSArduinoBase::fillCovar(twist_covar_, twist_x_stdev_, twist_y_stdev_, twist_yaw_stdev_);
+
+  pnh_.param<bool>("custom_covar", custom_covar_, false);
+  if(custom_covar_)
+  {
+    pnh_.param<double>("pose_stdev/x", pose_x_stdev_, 0.001);
+    pnh_.param<double>("pose_stdev/y", pose_y_stdev_, 0.001);
+    pnh_.param<double>("pose_stdev/yaw", pose_yaw_stdev_, 0.001);
+    pnh_.param<double>("twist_stdev/x", twist_x_stdev_, 0.01);
+    pnh_.param<double>("twist_stdev/y", twist_y_stdev_, 0.01);
+    pnh_.param<double>("twist_stdev/yaw", twist_yaw_stdev_, 0.01);
+
+    ROSArduinoBase::fillCovar(pose_covar_, pose_x_stdev_, pose_y_stdev_, pose_yaw_stdev_);
+    ROSArduinoBase::fillCovar(twist_covar_, twist_x_stdev_, twist_y_stdev_, twist_yaw_stdev_);
+  }
+
 
   ROS_INFO("Starting ROS Arduino Base");
 }
-
-ROSArduinoBase::~ROSArduinoBase()
-{
-  ROS_INFO("Destroying ROS Arduino Base");
-}
-
 
 void ROSArduinoBase::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_msg)
 {
@@ -104,11 +105,14 @@ void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &conf
   gains_[0] = config.K_P;
   gains_[1] = config.K_I;
   gains_[2] = config.K_D;
+
   ros_arduino_base::UpdateGains srv;
+
   for (int i = 0; i < 3; i++)
   {
     srv.request.gains[i] = gains_[i];
   }
+
   if (update_gains_client_.call(srv))
   {
     ROS_INFO("Motor Gains changed to P:%f I:%f D: %f", gains_[0], gains_[1], gains_[2]);
@@ -126,18 +130,18 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   left_counts_ = encoders_msg->left;
   right_counts_ = encoders_msg->right;
 
-  double dt = encoders_msg->header.stamp.toSec() - encoder_previous_time_.toSec();  // [s]
-  double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;  // [m/s]
-  double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;  // [m/s]
+  double dt = encoders_msg->header.stamp.toSec() - encoder_previous_time_.toSec();                          // [seconds]
+  double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;             // [m/s]
+  double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;          // [m/s]
   double delta_s = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          + (left_counts_ - old_left_counts_)) / 2.0);  // [m]
+                                          + (left_counts_ - old_left_counts_)) / 2.0);                      // [m]
   double delta_theta = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          - (left_counts_ - old_left_counts_)) / base_width_);  // [radians]
-  double dx = delta_s * cos(theta_ + delta_theta / 2.0);  // [m]
-  double dy = delta_s * sin(theta_ + delta_theta / 2.0);  // [m]
-  x_ += dx;  // [m]
-  y_ += dy;  // [m]
-  theta_ += delta_theta;  // [radians]
+                                          - (left_counts_ - old_left_counts_)) / base_width_);              // [radians]
+  double dx = delta_s * cos(theta_ + delta_theta / 2.0);                                                    // [m]
+  double dy = delta_s * sin(theta_ + delta_theta / 2.0);                                                    // [m]
+  x_ += dx;                                                                                                 // [m]
+  y_ += dy;                                                                                                 // [m]
+  theta_ += delta_theta;                                                                                    // [radians]
   geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
   if (publish_tf_)
@@ -167,10 +171,15 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   odom.twist.twist.angular.x = 0.0;
   odom.twist.twist.angular.y = 0.0;
   odom.twist.twist.angular.z = delta_theta / dt;
-  // Fill in the covar. TODO make a param
-  odom.pose.covariance = pose_covar_;
-  odom.twist.covariance = twist_covar_;
+
+  if(custom_covar_)
+  {
+    odom.pose.covariance = pose_covar_;
+    odom.twist.covariance = twist_covar_;
+  }
+
   odom_pub_.publish(odom);
+
   // Keep track of previous variables.
   encoder_previous_time_ = encoders_msg->header.stamp;
   old_right_counts_ = right_counts_;
@@ -180,10 +189,10 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
 void ROSArduinoBase::fillCovar(boost::array<double, 36> & covar, double x_stdev, double y_stdev, double yaw_stdev)
 {
   std::fill(covar.begin(), covar.end(), 0.0);
-  covar[0] = pow(x_stdev, 2);  // X
-  covar[7] = pow(y_stdev, 2);  // Y
-  covar[14] = 1e6;  // Z
-  covar[21] = 1e6;  // roll
-  covar[28] = 1e6;  // pitch
+  covar[0]  = pow(x_stdev, 2);    // X
+  covar[7]  = pow(y_stdev, 2);    // Y
+  covar[14] = 1e6;                // Z
+  covar[21] = 1e6;                // roll
+  covar[28] = 1e6;                // pitch
   covar[35] = pow(yaw_stdev, 2);  // yaw(theta)
 }

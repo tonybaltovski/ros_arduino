@@ -199,8 +199,3 @@ void RawImuBridge::fillRowMajor(boost::array<double, 9> & covar, double stdev)
   covar[4] = pow(stdev, 2);  // Y(pitch)
   covar[8] = pow(stdev, 2);  // Z(yaw)
 }
-
-RawImuBridge::~RawImuBridge()
-{
-
-}

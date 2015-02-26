@@ -16,7 +16,7 @@ void setupMotors()
 {
 
 }
-void commandLeftMotor(int cmd)
+void commandLeftMotor(int16_t cmd)
 {
   if (cmd >= 0)
   {
@@ -28,7 +28,7 @@ void commandLeftMotor(int cmd)
   }
   analogWrite(left_motor_enable, abs(cmd));
 }
-void commandRightMotor(int cmd)
+void commandRightMotor(int16_t cmd)
 {
   if (cmd >= 0)
   {

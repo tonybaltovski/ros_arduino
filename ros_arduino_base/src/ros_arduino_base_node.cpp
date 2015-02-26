@@ -34,7 +34,10 @@ POSSIBILITY OF SUCH DAMAGE.
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "ros_arduino_base_node");
-  ros::NodeHandle nh(""), nh_private("~");
-  ROSArduinoBase ros_arduino_base(nh, nh_private);
+  ros::NodeHandle nh, pnh("~");
+  ROSArduinoBase ros_arduino_base(nh, pnh);
+
   ros::spin();
+
+  return 0;
 }
