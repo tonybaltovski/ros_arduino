@@ -34,7 +34,10 @@
 #include <ros/duration.h>
 #include <ros_arduino_base/UpdateGains.h>
 #include <ros_arduino_msgs/BaseFeedback.h>
+#include <ros_arduino_msgs/BaseStatus.h>
 #include <ros_arduino_msgs/Drive.h>
+#include <ros_arduino_msgs/RawImu.h>
+#include <geometry_msgs/Vector3.h>
 
 /********************************************************************************************
 /                                                     USER CONFIG                           *
@@ -108,14 +111,27 @@ void Control();
 int control_rate[1];   // [Hz]
 int feedback_rate[1];  // [Hz]
 int status_rate[1];    // [Hz]
+int imu_rate[1];        // [Hz]
 int no_cmd_timeout[1]; // [seconds]
 
+uint32_t start_time = millis();
 uint32_t last_feedback_time;  // [milliseconds]
 uint32_t last_cmd_time;       // [milliseconds]
 uint32_t last_control_time;   // [milliseconds]
+uint32_t last_status_time;    // [milliseconds]
+uint32_t last_imu_time;    // [milliseconds]
 
 // ROS node
-ros::NodeHandle_<ArduinoHardware, 2, 1, 1024, 1024> nh;
+ros::NodeHandle_<ArduinoHardware, 3, 3, 1024, 1024> nh;
+
+#if defined(WIRE_T3)
+  #include <i2c_t3.h>
+#else
+  #include <Wire.h>
+#endif
+
+#include "imu_configuration.h"
+bool imu_is_first = true;
 
 // ROS subribers/service callbacks prototye
 void driveCallback(const ros_arduino_msgs::Drive& drive_msg); 
@@ -130,20 +146,28 @@ ros::ServiceServer<ros_arduino_base::UpdateGains::Request, ros_arduino_base::Upd
 
 // ROS publishers msgs
 ros_arduino_msgs::BaseFeedback feedback_msg;
-char frame_id[] = "base_link";
+ros_arduino_msgs::BaseStatus status_msg;
+ros_arduino_msgs::RawImu raw_imu_msg;
+char base_id[] = "base_link";
+char imu_id[] = "imu_link";
 
 // ROS publishers
 ros::Publisher pub_feedback("feedback", &feedback_msg);
+ros::Publisher pub_status("status", &status_msg);
+ros::Publisher pub_raw_imu("raw_imu", &raw_imu_msg);
 
 void setup() 
 { 
   // Set the node handle
-  nh.getHardware()->setBaud(BAUD);
+  //nh.getHardware()->setBaud(BAUD);
   nh.initNode();
 
-  feedback_msg.header.frame_id = frame_id;
+  feedback_msg.header.frame_id = base_id;
+  raw_imu_msg.header.frame_id = imu_id;
   // Pub/Sub
   nh.advertise(pub_feedback);
+  nh.advertise(pub_status);
+  nh.advertise(pub_raw_imu);
   nh.subscribe(sub_drive);
   nh.advertiseService(update_gains_server);
   
@@ -152,6 +176,12 @@ void setup()
   {
     nh.spinOnce();
   }
+  #if defined(WIRE_T3)
+    Wire.begin(I2C_MASTER, 0x00, I2C_PINS_18_19, I2C_PULLUP_INT, I2C_RATE_400);
+  #else
+    Wire.begin();
+  #endif
+  
   nh.loginfo("Connected to microcontroller.");
 
   if (!nh.getParam("control_rate", control_rate,1))
@@ -161,6 +191,14 @@ void setup()
   if (!nh.getParam("feedback_rate", feedback_rate,1))
   {
     feedback_rate[0] = 50;
+  }
+  if (!nh.getParam("status_rate", status_rate,1))
+  {
+    status_rate[0] = 1;
+  }
+  if (!nh.getParam("imu_rate", imu_rate,1))
+  {
+    imu_rate[0] = 50;
   }
   if (!nh.getParam("no_cmd_timeout", no_cmd_timeout,1))
   {
@@ -194,33 +232,93 @@ void setup()
 
 void loop() 
 {
-  if ((millis() - last_feedback_time) >= (1000 / feedback_rate[0]))
-  { 
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].estimated_distance = left_encoder.read() * (2*PI / counts_per_rev[0]);
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].estimated_velocity = left_motor_controller.estimated_velocity;
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].fault = left_motor.fault();
-    //feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].current_draw = left_motor.motor_current();
-   
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].estimated_distance = right_encoder.read() * (2*PI / counts_per_rev[0]);
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].estimated_velocity = right_motor_controller.estimated_velocity;
-    feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].fault = right_motor.fault();
-    //feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].current_draw = right_motor.motor_current();
-    
-    feedback_msg.header.stamp = nh.now();
-    pub_feedback.publish(&feedback_msg);
-    last_feedback_time = millis();
-  }
-  if ((millis()) - last_control_time >= (1000 / control_rate[0]))
-  {
-    Control();
-    last_control_time = millis();
-  }
-
   // Stop motors after a period of no commands
   if((millis() - last_cmd_time) >= (no_cmd_timeout[0] * 1000))
   {
     left_motor_controller.desired_velocity = 0.0;
     right_motor_controller.desired_velocity = 0.0;
+  }
+  if ((millis() - last_control_time) >= (1000 / control_rate[0]))
+  {
+    Control();
+    last_control_time = millis();
+  }
+  
+
+  if (nh.connected())
+  {
+    if ((millis() - last_feedback_time) >= (1000 / feedback_rate[0]))
+    { 
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].estimated_distance = left_encoder.read() * (2*PI / counts_per_rev[0]);
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].estimated_velocity = left_motor_controller.estimated_velocity;
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].fault = left_motor.fault();
+      //feedback_msg.motors[ros_arduino_msgs::BaseFeedback::LEFT].current_draw = left_motor.motor_current();
+     
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].estimated_distance = right_encoder.read() * (2*PI / counts_per_rev[0]);
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].estimated_velocity = right_motor_controller.estimated_velocity;
+      feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].fault = right_motor.fault();
+      //feedback_msg.motors[ros_arduino_msgs::BaseFeedback::RIGHT].current_draw = right_motor.motor_current();
+      
+      feedback_msg.header.stamp = nh.now();
+      pub_feedback.publish(&feedback_msg);
+      last_feedback_time = millis();
+    }
+    
+    if ((millis() - last_status_time) >= (1000 / status_rate[0]))
+    {
+      status_msg.mcu_uptime.fromSec((millis() - start_time) / 1000);
+      pub_status.publish(&status_msg);
+      last_status_time = millis();
+    }
+    
+    if (imu_is_first)
+    { 
+      status_msg.accelerometer = check_accelerometer();
+      status_msg.gyroscope = check_gyroscope();
+      status_msg.magnetometer = check_magnetometer();
+      
+      if (!status_msg.accelerometer)
+      {
+        nh.logerror("Accelerometer NOT FOUND!");
+      }
+      
+      if (!status_msg.gyroscope)
+      {
+        nh.logerror("Gyroscope NOT FOUND!");
+      }
+      
+      if (!status_msg.magnetometer)
+      {
+        nh.logerror("Magnetometer NOT FOUND!");
+      }
+      
+      imu_is_first = false;
+    }
+    else if ((millis() - last_imu_time) >= (1000 / imu_rate[0]))
+    {
+      raw_imu_msg.header.stamp = nh.now();
+      if (status_msg.accelerometer)
+      {
+        measure_acceleration();
+        raw_imu_msg.raw_linear_acceleration = raw_acceleration;
+      }
+      
+      if (status_msg.gyroscope)
+      {
+        measure_gyroscope();
+        raw_imu_msg.raw_angular_velocity = raw_rotation;
+      }
+      
+      if (status_msg.magnetometer)
+      {
+        measure_magnetometer();
+        raw_imu_msg.raw_magnetic_field = raw_magnetic_field;
+      }
+
+      pub_raw_imu.publish(&raw_imu_msg);
+
+      last_imu_time = millis();
+    }
   }
   
   nh.spinOnce();

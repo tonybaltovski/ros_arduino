@@ -11,6 +11,7 @@ add_message_files(
   Drive.msg
   Feedback.msg
   BaseFeedback.msg
+  BaseStatus.msg
 )
 
 generate_messages(
