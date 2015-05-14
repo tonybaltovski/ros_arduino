@@ -14,9 +14,10 @@
 // Select your IMU board from the list below.
 // If not avaliable, define a custom one but feel free to added it.
 //#define SEN10724
-#define GY85
+//#define GY85
 //#define GY80
 //#define OTHER
+#define MPU9150
 
 #if defined(SEN10724)
   // Accelerometer
@@ -92,7 +93,7 @@
   #define MAG_Z_AXIS 1
   #define MAG_X_INVERT 1
   #define MAG_Y_INVERT 1
-  #define MAG_Z_INVERT 1
+  #define MAG_Z_INVERT 1  
 #elif defined(OTHER)
   // Accelerometer
   #define ADXL345
