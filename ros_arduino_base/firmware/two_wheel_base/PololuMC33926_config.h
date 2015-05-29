@@ -23,4 +23,3 @@ void commandRightMotor(int16_t cmd)
 }
 
 #endif  // _PololuMC33926_CONFIG_H_
-

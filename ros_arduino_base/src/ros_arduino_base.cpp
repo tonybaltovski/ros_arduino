@@ -50,7 +50,7 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle pnh):
   encoders_sub_ = nh_.subscribe("encoders", 5, &ROSArduinoBase::encodersCallback, this);
   cmd_vel_sub_ = nh_.subscribe("cmd_vel", 5, &ROSArduinoBase::cmdVelCallback, this);
   update_gains_client_ = nh.serviceClient<ros_arduino_base::UpdateGains>("update_gains");
-  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType 
+  dynamic_reconfigure::Server<ros_arduino_base::MotorGainsConfig>::CallbackType
     f = boost::bind(&ROSArduinoBase::motorGainsCallback, this, _1, _2);
   gain_server_.setCallback(f);
 
@@ -74,7 +74,8 @@ ROSArduinoBase::ROSArduinoBase(ros::NodeHandle nh, ros::NodeHandle pnh):
   }
 
   pnh_.param<bool>("custom_covar", custom_covar_, false);
-  if(custom_covar_)
+
+  if (custom_covar_)
   {
     pnh_.param<double>("pose_stdev/x", pose_x_stdev_, 0.001);
     pnh_.param<double>("pose_stdev/y", pose_y_stdev_, 0.001);
@@ -100,7 +101,7 @@ void ROSArduinoBase::cmdVelCallback(const geometry_msgs::Twist::ConstPtr& vel_ms
   cmd_diff_vel_pub_.publish(cmd_diff_vel_msg);
 }
 
-void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level) 
+void ROSArduinoBase::motorGainsCallback(ros_arduino_base::MotorGainsConfig &config, uint32_t level)
 {
   gains_[0] = config.K_P;
   gains_[1] = config.K_I;
@@ -134,9 +135,9 @@ void ROSArduinoBase::encodersCallback(const ros_arduino_msgs::Encoders::ConstPtr
   double velocity_estimate_left_ = meters_per_counts_ * (left_counts_ - old_left_counts_) / dt;     // [m/s]
   double velocity_estimate_right_ = meters_per_counts_ * (right_counts_ - old_right_counts_) / dt;  // [m/s]
   double delta_s = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          + (left_counts_ - old_left_counts_)) / 2.0);              // [m]
+                                        + (left_counts_ - old_left_counts_)) / 2.0);                // [m]
   double delta_theta = meters_per_counts_ * (((right_counts_ - old_right_counts_)
-                                          - (left_counts_ - old_left_counts_)) / base_width_);      // [radians]
+                                          -     (left_counts_ - old_left_counts_)) / base_width_);  // [radians]
   double dx = delta_s * cos(theta_ + delta_theta / 2.0);                                            // [m]
   double dy = delta_s * sin(theta_ + delta_theta / 2.0);                                            // [m]
   x_ += dx;                                                                                         // [m]
