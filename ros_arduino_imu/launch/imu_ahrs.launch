@@ -1,9 +1,9 @@
 <launch>
 
   <node pkg="rosserial_python" type="serial_node.py" name="ros_arduino_imu" output="screen" respawn="true">
-    <param name="~port" value="/dev/ttyACM0" />
+    <param name="~port" value="/dev/arduino" />
     <param name="~baud" value="115200" />
-  </node> 
+  </node>
 
   <node pkg="ros_arduino_imu" type="raw_imu_bridge_node" name="raw_imu_bridge" output="screen" respawn="false" />
 
