@@ -38,6 +38,7 @@ bool is_first = true;
 
 void setup()
 {
+    nh.getHardware()->setBaud(115200);
     //initalize the ros node
     nh.initNode();
     nh.advertise(raw_imu_pub);
