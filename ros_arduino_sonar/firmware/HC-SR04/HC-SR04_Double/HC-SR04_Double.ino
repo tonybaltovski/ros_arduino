@@ -62,12 +62,12 @@ void setup() {
  sensor1_msg.min_range = 0.02;
  sensor1_msg.max_range = 5;
  
- sensor1_msg.header.frame_id = "sensor1_link";
+ sensor1_msg.header.frame_id = "sonar1_link";
  sensor2_msg.field_of_view = 0.261799;
  sensor2_msg.min_range = 0.02;
  sensor2_msg.max_range = 5;
  
- sensor2_msg.header.frame_id = "sensor2_link";
+ sensor2_msg.header.frame_id = "sonar2_link";
 
 }
 
