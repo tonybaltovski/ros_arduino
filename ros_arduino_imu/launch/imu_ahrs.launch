@@ -7,6 +7,11 @@
 
   <node pkg="ros_arduino_imu" type="raw_imu_bridge_node" name="raw_imu_bridge" output="screen" respawn="false" />
 
-  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" />
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false">
+    <param name="~publish_debug_topics" value="True" />
+    <param name="~use_mag" value="True" />
+    <param name="~gain" value="0.10" />
+    <remap from="imu/data" to="imu/data2" />
+  </node>
 
 </launch>
