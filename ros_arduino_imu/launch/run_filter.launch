@@ -1,0 +1,33 @@
+<launch>
+  <arg name="input_filename" default="/home/cholloway/data/blackwidow/imu_testing/converted.bag" />
+
+  <arg name="output_filename" default="/home/cholloway/data/blackwidow/imu_testing/output.bag" />
+
+  <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(arg input_filename)"/>
+
+  <node pkg="imu_filter_madgwick" type="imu_filter_node" name="imu_filter_madgwick" output="screen" respawn="false" >
+      <param name="~publish_debug_topics" value="True" />
+      <param name="~use_mag" value="True" />
+      <param name="~gain" value="0.10" />
+      <remap from="imu/data" to="imu/data2" />
+  </node>
+
+  <node pkg="ros_arduino_imu" type="raw_imu_bridge_node" name="raw_imu_bridge" output="screen" respawn="false" />
+
+  <node pkg="robot_localization" type="ekf_localization_node" name="t1_ekf_localization" clear_params="true">
+    <rosparam file="$(find blackwidow_control)/config/robot_localization2.yaml" command="load" />
+    <remap from="odometry/filtered" to="platform_odometry2"/>
+    <remap from="set_pose" to="platform/set_pose"/>
+  </node>
+
+  <arg name="robot_name" default="MAST" />
+  <node pkg="vicontf_to_odom" type="vicontf_to_odom.py" name="vicontf_to_odom" >
+    <param name="vicon_name" type="string" value="$(arg robot_name)" />
+  </node>
+
+  <node pkg="vicontf_to_odom" type="vicontf_to_odom.py" name="vicontf_to_odom" >
+    <param name="vicon_name" type="string" value="blackwidow" />
+  </node>
+
+  <node pkg="rosbag" type="record" name="recorder" output="screen" args="-a -o /home/cholloway/data/blackwidow/imu_testing/output.bag"/>
+</launch>

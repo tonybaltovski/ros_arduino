@@ -105,17 +105,17 @@ void loop()
        raw_imu_msg.header.frame_id = "imu_link";
        //take linear acceleration off of the accelerometer
        //assumes units are in m/s^2
-       raw_imu_msg.raw_linear_acceleration.x = (float)ax;
-       raw_imu_msg.raw_linear_acceleration.y = (float)ay;
-       raw_imu_msg.raw_linear_acceleration.z = (float)az;
+       raw_imu_msg.raw_linear_acceleration.x = (float)2*9.81*ax/32767.0;
+       raw_imu_msg.raw_linear_acceleration.y = (float)2*9.81*ay/32767.0;
+       raw_imu_msg.raw_linear_acceleration.z = (float)2*9.81*az/32767.0;
        //take angular velocity off of the gyroscope, assuming rad/sec
-       raw_imu_msg.raw_angular_velocity.x = (float)gx;
-       raw_imu_msg.raw_angular_velocity.y = (float)gy;
-       raw_imu_msg.raw_angular_velocity.z = (float)gz;
+       raw_imu_msg.raw_angular_velocity.x = (float)4.36332313*gx/32767.0;
+       raw_imu_msg.raw_angular_velocity.y = (float)4.36332313*gy/32767.0;
+       raw_imu_msg.raw_angular_velocity.z = (float)4.36332313*gz/32767.0;
        
-       raw_imu_msg.raw_magnetic_field.x = (float)mx;
-       raw_imu_msg.raw_magnetic_field.y = (float)my;
-       raw_imu_msg.raw_magnetic_field.z = (float)mz;
+       raw_imu_msg.raw_magnetic_field.x = (float)1.2e-3*mx/32767.0;
+       raw_imu_msg.raw_magnetic_field.y = (float)1.2e-3*my/32767.0;
+       raw_imu_msg.raw_magnetic_field.z = (float)1.2e-3*mz/32767.0;
         
         raw_imu_msg.header.stamp = nh.now();
         raw_imu_msg.header.frame_id = "imu_link";
