@@ -54,21 +54,33 @@ ros::Publisher sensor8_pub("sonar8", &sensor8_msg);
 ros::Publisher threshold_pub("threshold", &threshold_msg);
 
 
-int maximumRange = 40; // Maximum range needed
-int minimumRange = 5; // Minimum range needed
-double duration1, duration2, duration3, duration4, duration5, duration6, duration7, duration8; // Duration used to calculate distance
-double distance[8];
-
-int iteration;
-long output1, output2, output3, output4, output5, output6, output7, output8;
-unsigned long pulseWait = 100000;
 
 
 
 void setup() {
 
+int maximumRange = 40; // Maximum range needed
+int minimumRange = 5; // Minimum range needed
+long duration1, duration2, duration3, duration4, duration5, duration6, duration7, duration8; // Duration used to calculate distance
+long distance[8];
+
+int iteration;
+long output1, output2, output3, output4, output5, output6, output7, output8;
+unsigned long pulseWait = 7000;
+
+bool first_time_flag = true;
+int numSonar = 8;
+int avgNum = 10;
+
+ double run_avg_values[8][10];  // rows, columns
+  double run_avg[8][2];  // rows, columns. Row 1 is the running average and row 2 is the cell to be replace by new data
+
+  int j = 0;
+  int i = 0;
+
+
+
  nh.getHardware()->setBaud(115200);
-//nh.getHardware()->setBaud(57600);
  //initalize the ros node
  nh.initNode();
  nh.advertise(sensor1_pub);
@@ -161,44 +173,32 @@ void setup() {
  threshold_msg.header.frame_id = "threshold_link";
 
  
-}
+//}
 
 
-void loop() {
+//void loop() {
 
-int numSonar = 8;
-int avgNum = 10;
-double run_avg_values[numSonar][avgNum];  // rows, columns
-double run_avg[numSonar][2];  // rows, columns. Row 1 is the running average and row 2 is the cell to be replace by new data
+ 
 
-int j = 0;
-int i = 0;
 
- // ...................................... Array_SETUP .................................................//
-
- while (i < numSonar){
-    while (j < avgNum){
-      run_avg_values[i][j] = 0;
-      j = j + 1;
+   // ...................................... Array_SETUP .................................................//
+//  if (first_time_flag == true){
+    while (i < numSonar){
+      while (j < avgNum){
+        run_avg_values[i][j] = 0;
+        j = j + 1;
+      }
+      run_avg[i][0] = 0;  
+      run_avg[i][1] = 0;
+      i = i + 1; 
     }
-    run_avg[i][0] = 0;  
-    run_avg[i][1] = 0;
-    i = i + 1; 
-  }
+//    first_time_flag = false;
+//  } 
 
 
  // ................................................................................................//
 
-
-
-//if (iteration == avgNum){
-//  iteration = 0;
-//  output1 = 0;
-//  output2 = 0;
-//}
-//
-// iteration = iteration +1;
-
+while (1 > 0){
   // ....................... SONAR 1 ................................. //
 
   
@@ -419,32 +419,6 @@ int i = 0;
  nh.spinOnce();
  
 
-// ....................... SERIAL PRINT ................................. //
-
-// if(iteration <= avgNum){
-//  output1 = output1 + distance1;
-//  output2 = output2 + distance2;
-// }
-// 
-// if(iteration == avgNum){
-//  output1 = output1/avgNum;
-//  output2 = output2/avgNum;
-//
-//  Serial.print(output1);
-//  Serial.print("/");
-//  Serial.println(output2);
-// }
-//
-//if((distance1 <= 230) && (distance1 >= 2)){
-//  Serial.println(distance1);
-//  delayMicroseconds(100);
-// }
-
-// if((distance2 <= 230) && (distance2 >= 2)){
-//  Serial.print("  ");
-//  Serial.println(distance2);
-//  delayMicroseconds(200);
-// }
 
 // ......................... LED ........................... //
 
@@ -455,4 +429,11 @@ int i = 0;
 //   digitalWrite(LEDPin, HIGH);
 // }
 //
+
 }
+
+}
+void loop() {
+  
+}
+
