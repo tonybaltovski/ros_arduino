@@ -1,4 +1,4 @@
-ros_arduino
+ros_arduino[![Build Status](https://travis-ci.org/tonybaltovski/ros_arduino.svg?branch=indigo-devel)](https://travis-ci.org/tonybaltovski/ros_arduino)
 ===========
 ## Overview ##
 ros_arduino provides a simple interface for a mobile robot using an Arduino(-like) mircocontroller using [rosserial](https://github.com/ros-drivers/rosserial).

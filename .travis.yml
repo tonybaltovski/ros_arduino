@@ -13,7 +13,7 @@ install:
   - sudo apt-get install python-rosdep -y
   - sudo `which rosdep` init
   - rosdep update
-  - rosdep install --default-yes --from-paths ./ --rosdistro $CI_ROS_DISTRO
+  - rosdep install --default-yes --from-paths . --ignore-src --rosdistro $CI_ROS_DISTRO
 script:
   - mkdir -p ~/catkin_ws/src
   - ln -s $TRAVIS_BUILD_DIR ~/catkin_ws/src/repo
