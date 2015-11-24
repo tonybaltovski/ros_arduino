@@ -12,10 +12,13 @@
   <build_depend>roscpp</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_srvs</build_depend>
   <build_depend>ros_arduino_msgs</build_depend>
 
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>std_srvs</run_depend>
   <run_depend>ros_arduino_msgs</run_depend>
+  <run_depend>rosserial_python</run_depend>
 </package>
