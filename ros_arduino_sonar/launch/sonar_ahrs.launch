@@ -1,0 +1,7 @@
+<launch>
+  <arg name="port" default="/dev/arduino" />
+  <node pkg="rosserial_python" type="serial_node.py" name="ros_arduino_sonar" output="screen" respawn="true">
+    <param name="~port" value="$(arg port)" />
+    <param name="~baud" value="115200" />
+  </node>
+</launch>
